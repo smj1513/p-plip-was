@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pplip.domain.file.persistence.dao.mapper.NoticeBoardImagePropertyMapper">
+    <resultMap id="noticeBoardImagePropertyMap" type="com.pplip.domain.file.persistence.entity.NoticeBoardImageProperty" autoMapping="true"/>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into notice_board_image_property (board_id, origin_file_name, path, saved_file_name, size, content_type, created_at,
+                                                 updated_at, uploader_id)
+        values (#{boardId}, #{originFileName}, #{path}, #{savedFileName}, #{size}, #{createdAt}, #{content_type},#{updatedAt}, #{uploaderId});
+    </insert>
+
+    <insert id="insertAll" useGeneratedKeys="true" keyProperty="id">
+        insert into notice_board_image_property (board_id, origin_file_name, path, saved_file_name, size, content_type,
+        created_at,
+        updated_at, uploader_id)
+        values
+        <foreach collection="list" index="index" item="image" separator=",">
+            (#{image.boardId}, #{image.originFileName}, #{image.path}, #{image.savedFileName}, #{image.size}, #{image.createdAt},
+            #{image.content_type},#{image.updatedAt}, #{image.uploaderId})
+        </foreach>
+    </insert>
+
+    <delete id="delete">
+        delete
+        from notice_board_image_property
+        where id = #{id};
+    </delete>
+
+    <select id="findById" resultMap="noticeBoardImagePropertyMap">
+        select *
+        from notice_board_image_property
+        where id = #{id};
+    </select>
+
+    <select id="findAllByIds" resultMap="noticeBoardImagePropertyMap">
+        select *
+        from notice_board_image_property
+        where id in
+        <foreach collection="fileIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="bulkUpdateBoardId">
+        UPDATE notice_board_image_property
+        SET
+        board_id = #{boardId},
+        updated_at = now()
+        WHERE id IN
+        <foreach collection="imageIds" item="imageId" open="(" close=")" separator=",">
+            #{imageId}
+        </foreach>
+    </update>
+</mapper>

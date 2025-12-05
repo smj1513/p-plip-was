@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pplip.domain.user.persistence.dao.ProfileDao">
+
+    <insert id="insert" parameterType="com.pplip.domain.user.persistence.entity.Profile">
+        insert into profile (description, user_id, nickname)
+        values (#{description}, #{userId}, #{nickname});
+    </insert>
+
+    <select id="findById" resultType="com.pplip.domain.user.persistence.entity.Profile">
+        select
+            id,
+            description,
+            user_id as userId,
+            nickname
+        from profile
+        where id = #{id};
+    </select>
+
+    <select id="findByUserId" resultType="com.pplip.domain.user.persistence.entity.Profile">
+        select
+            p.id as id,
+            description,
+            user_id as userId,
+            nickname
+        from profile p
+        join user u on p.user_id = u.id
+        where user_id = #{userId};
+    </select>
+
+    <select id="existsNickname" resultType="boolean">
+        select count(*) > 0
+        from profile
+        where nickname = #{nickname};
+    </select>
+
+    <update id="update" parameterType="com.pplip.domain.user.persistence.entity.Profile">
+        update profile
+        <set>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="nickname != null">
+                nickname = #{nickname},
+            </if>
+        </set>
+        where id = #{id};
+    </update>
+
+    <delete id="delete">
+        delete from profile where id = #{id};
+    </delete>
+
+</mapper>

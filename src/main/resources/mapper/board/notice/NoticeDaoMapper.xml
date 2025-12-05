@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pplip.domain.board.notice.persistence.dao.NoticeDao">
+
+    <select id="findAll" resultMap="summaryMap">
+        SELECT nb.id as id,
+               nb.title as title,
+               pf.nickname as authorName,
+               nb.view_cnt as viewCnt,
+               nb.created_at as createdAt,
+               nb.updated_at as updatedAt
+        FROM notice_board nb
+                 JOIN user u ON nb.author_id = u.id
+                 JOIN profile pf ON pf.user_id = u.id
+        WHERE nb.is_removed = false
+        ORDER BY nb.created_at DESC
+            LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <resultMap id="summaryMap" type="com.pplip.domain.board.notice.api.response.NoticeResponse$Summary" autoMapping="true"></resultMap>
+
+    <select id="findById" resultMap="detailMap">
+        SELECT nb.id as notice_id,
+               nb.title as title,
+               pf.nickname as authorName,
+               nb.content as content,
+               nb.view_cnt as viewCnt,
+               nb.created_at as createdAt,
+               nb.updated_at as updatedAt,
+
+               nip.id as img_id,
+               nip.saved_file_name as img_name,
+               nip.path as img_path,
+               nip.size as img_size
+
+        FROM notice_board nb
+                 JOIN user u ON nb.author_id = u.id
+                 JOIN profile pf ON pf.user_id = u.id
+                 LEFT JOIN notice_board_image_property nip ON nb.id = nip.board_id
+
+        WHERE nb.id = #{id} AND nb.is_removed = false
+    </select>
+
+    <resultMap id="detailMap" type="com.pplip.domain.board.notice.api.response.NoticeResponse$Detail" autoMapping="true">
+        <id property="id" column="notice_id"/>
+        <result property="title" column="title"/>
+        <collection property="noticeImages" ofType="com.pplip.domain.file.api.response.FileResponse">
+            <id property="id" column="img_id"/>
+            <result property="name" column="img_name"/>
+            <result property="path" column="img_path"/>
+            <result property="size" column="img_size"/>
+        </collection>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notice_board (author_id, title, content, view_cnt, is_removed, created_at, updated_at)
+        VALUES (#{authorId}, #{title}, #{content}, #{viewCnt}, #{isRemoved}, #{createdAt}, #{updatedAt});
+    </insert>
+
+    <update id="delete">
+        UPDATE notice_board
+        SET is_removed = true,
+            updated_at = NOW()
+        WHERE id = #{id};
+    </update>
+
+    <update id="update">
+        UPDATE notice_board
+        <set>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="content != null">
+                content = #{content},
+            </if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id};
+    </update>
+</mapper>

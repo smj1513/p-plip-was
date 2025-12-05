@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pplip.domain.auth.persistence.dao.AccountDao">
+    <select id="findByEmail" resultType="com.pplip.domain.auth.persistence.entity.Account">
+        select *
+        from account
+        where email = #{username};
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into account (user_id, email, password, role, password_updated_at, created_at)
+        values (#{userId}, #{email}, #{password}, #{role}, #{passwordUpdatedAt}, #{createdAt});
+    </insert>
+
+    <update id="updatePassword">
+        update account
+        set password = #{password},
+            updated_at = now()
+        where email = #{email};
+    </update>
+</mapper>

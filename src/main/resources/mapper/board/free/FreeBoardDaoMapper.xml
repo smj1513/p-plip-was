@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pplip.domain.board.freeboard.persistence.dao.FreeBoardDao">
+
+    <select id="findAll" resultMap="boardListMap">
+        SELECT fb.id AS id,
+               fb.title AS title,
+               p.nickname AS authorName,
+               fb.created_at AS createdAt,
+               fb.updated_at AS updatedAt,
+               (SELECT COUNT(*) FROM user_like_board ulb WHERE ulb.board_id = fb.id) AS likeCnt
+        FROM free_board fb
+                 JOIN user u ON fb.author_id = u.id
+                 JOIN profile p ON p.user_id = u.id
+        WHERE fb.is_removed = false
+        ORDER BY fb.created_at DESC  LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <resultMap id="boardListMap" type="com.pplip.domain.board.freeboard.api.response.FreeBoardResponse$BoardList" autoMapping="true">
+        <id column="id" property="id"></id>
+    </resultMap>
+
+    <resultMap id="detailMap" type="com.pplip.domain.board.freeboard.api.response.FreeBoardResponse$Detail" autoMapping="true">
+        <id property="id" column="board_id"/>
+        <result property="authorName" column="authorName"/>
+        <result property="likeCnt" column="likeCnt"/>
+
+        <collection property="freeBoardImages" ofType="com.pplip.domain.file.api.response.FileResponse">
+            <id property="id" column="img_id"/>
+            <result property="name" column="img_name"/>
+            <result property="path" column="img_path"/>
+            <result property="size" column="img_size"/>
+        </collection>
+    </resultMap>
+
+    <select id="findById" resultMap="detailMap">
+        SELECT fb.id AS board_id,
+               fb.title AS title,
+               p.nickname AS authorName,
+               fb.content AS content,
+               fb.created_at AS createdAt,
+               fb.updated_at AS updatedAt,
+               (SELECT COUNT(*) FROM user_like_board ulb WHERE ulb.board_id = fb.id) AS likeCnt,
+
+               fbip.id AS img_id,
+               fbip.saved_file_name AS img_name,
+               fbip.path AS img_path,
+               fbip.size AS img_size
+
+        FROM free_board fb
+                 JOIN user u ON fb.author_id = u.id
+                 JOIN profile p ON u.id = p.user_id
+                 LEFT JOIN free_board_image_property fbip ON fb.id = fbip.board_id
+        WHERE fb.id = #{id} AND fb.is_removed = false
+    </select>
+
+    <update id="update" parameterType="com.pplip.domain.board.freeboard.persistence.entity.FreeBoard">
+        UPDATE free_board
+        <set>
+            <if test="title != null"> title = #{title}, </if>
+            <if test="content != null"> content = #{content}, </if>
+            <if test="viewCnt != 0"> view_cnt = #{viewCnt}, </if>
+            updated_at = NOW() </set>
+        WHERE id = #{id};
+    </update>
+
+    <update id="delete">
+
+        update free_board
+
+        set is_removed = true,
+
+            updated_at = NOW()
+
+        where id = #{id};
+
+    </update>
+
+    <insert id="insert" parameterType="com.pplip.domain.board.freeboard.persistence.entity.FreeBoard" useGeneratedKeys="true" keyProperty="id">
+        insert into free_board (author_id, title, content, view_cnt, is_removed, created_at, updated_at)
+        values (#{authorId}, #{title}, #{content}, #{viewCnt}, #{isRemoved}, #{createdAt}, #{updatedAt});
+    </insert>
+</mapper>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pplip.domain.trip.plan.persistence.dao.PlanDao">
+
+    <select id="findAll" resultType="com.pplip.domain.trip.plan.api.response.PlanResponse$Summary">
+        select
+            id,
+            title,
+            start_date as startDate,
+            end_date as endDate,
+            created_at as createdAt
+        from plan
+        where user_id = #{userId};
+    </select>
+
+    <select id="findById" resultType="com.pplip.domain.trip.plan.api.response.PlanResponse$Detail">
+        select
+            id,
+            title,
+            start_date as startDate,
+            end_date as endDate,
+            created_at as createdAt
+        from plan
+        where id = #{id};
+    </select>
+
+    <insert id="insert" parameterType="com.pplip.domain.trip.plan.persistence.entity.Plan" useGeneratedKeys="true" keyProperty="id">
+        insert into plan (user_id, title, start_date, end_date, created_at)
+        values (#{userId}, #{title}, #{startDate}, #{endDate}, #{createdAt});
+    </insert>
+
+    <update id="update" parameterType="com.pplip.domain.trip.plan.persistence.entity.Plan">
+        update plan
+        <set>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="startDate != null">
+                start_date = #{startDate},
+            </if>
+            <if test="endDate != null">
+                end_date = #{endDate},
+            </if>
+        </set>
+        where id = #{id};
+    </update>
+
+    <delete id="delete">
+        delete from plan where id = #{id};
+    </delete>
+
+</mapper>

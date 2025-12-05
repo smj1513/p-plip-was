@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pplip.domain.trip.attraction.persistence.dao.SidoGugunsDao">
+
+    <resultMap id="sidoMap" type="com.pplip.domain.trip.attraction.api.response.AttractionResponse$Sido">
+        <id property="sidoCode" column="sido_code"/>
+        <result property="sidoName" column="sido_name"/>
+    </resultMap>
+
+    <resultMap id="gugunMap" type="com.pplip.domain.trip.attraction.api.response.AttractionResponse$Gugun">
+        <id property="gugunCode" column="gugun_code"/>
+        <result property="gugunName" column="gugun_name"/>
+    </resultMap>
+
+    <resultMap id="regionMap" type="com.pplip.domain.trip.attraction.api.response.AttractionResponse$Region">
+        <association property="sido" resultMap="sidoMap"/>
+        <collection property="guguns" ofType="com.pplip.domain.trip.attraction.api.response.AttractionResponse$Gugun"
+                    select="findAllGugunInSido" column="sido_code"/>
+    </resultMap>
+
+    <select id="findAllRegion" resultMap="regionMap">
+        select
+            sido_code,
+            sido_name
+        from sidos;
+    </select>
+
+    <select id="findAllSido" resultMap="sidoMap">
+        select
+            sido_code,
+            sido_name
+        from sidos;
+    </select>
+
+    <select id="findAllGugun" resultMap="gugunMap">
+        select
+            gugun_code,
+            gugun_name
+        from guguns;
+    </select>
+
+    <select id="findAllGugunInSido" resultMap="gugunMap">
+        select
+            gugun_code,
+            gugun_name
+        from guguns
+        where sido_code = #{sidoCode};
+    </select>
+
+</mapper>

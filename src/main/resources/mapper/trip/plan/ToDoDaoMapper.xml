@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pplip.domain.trip.plan.persistence.dao.TodoDao">
+    <select id="findAllByUserId" resultType="com.pplip.domain.trip.plan.api.response.ToDoResponse$Summary">
+        select t.id as id,
+               p.id as planId,
+               t.attraction_id as attractionId,
+               a.first_image1 as attractionImage,
+               t.will_start_at as willStartAt,
+               t.will_end_at as willEndAt,
+               t.created_at as createdAt
+        from to_do t
+                 join plan p
+                      on t.plan_id = p.id
+        join attractions a on a.no = t.attraction_id
+        where p.user_id = #{userId};
+    </select>
+
+    <select id="findAllByPlanId" resultType="com.pplip.domain.trip.plan.api.response.ToDoResponse$Summary">
+        select t.id as id,
+               p.id as planId,
+               t.attraction_id as attractionId,
+               a.first_image1 as attractionImage,
+               t.will_start_at as willStartAt,
+               t.will_end_at as willEndAt,
+               t.created_at as createdAt
+        from to_do t
+                 join plan p on t.plan_id = p.id
+                 join attractions a on a.no = t.attraction_id
+        where t.plan_id = #{planId};
+    </select>
+
+    <select id="findById" resultType="com.pplip.domain.trip.plan.api.response.ToDoResponse$Detail">
+        select t.id as id,
+               p.id as planId,
+               t.attraction_id as attractionId,
+               a.title as attractionTitle,
+               t.description as description,
+               a.first_image1 as attractionImage,
+               t.will_start_at as willStartAt,
+               t.will_end_at as willEndAt,
+               t.created_at as createdAt
+        from to_do t
+                 join plan p on t.plan_id = p.id
+                 join attractions a on a.no = t.attraction_id
+        where t.id = #{id};
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into to_do (plan_id, attraction_id, description, will_start_at, will_end_at, created_at)
+        values (#{planId}, #{attractionId}, #{description}, #{willStartAt}, #{willEndAt}, #{createdAt});
+    </insert>
+
+    <update id="update" parameterType="com.pplip.domain.trip.plan.persistence.entity.ToDo">
+        update to_do
+            <set>
+                 <if test="description != null">
+                     description = #{description},
+                 </if>
+                 <if test="willStartAt != null">
+                     will_start_at = #{willStartAt},
+                 </if>
+                 <if test="willEndAt != null">
+                     will_end_at = #{willEndAt},
+                 </if>
+            </set>
+        where id = #{id};
+    </update>
+    <delete id="delete">
+        delete
+        from to_do
+        where id = #{id};
+    </delete>
+</mapper>

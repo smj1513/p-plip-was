@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pplip.domain.trip.attraction.persistence.dao.SearchHistoryDao">
+    <select id="findAll" resultType="com.pplip.domain.trip.attraction.persistence.entity.SearchHistory">
+        select *
+        from search_history
+        where user_id = #{userId}
+        desc searched_at desc;
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into search_history (user_id, keyword, searched_at)
+        values (#{userId}, #{keyword}, #{searchedAt});
+    </insert>
+</mapper>

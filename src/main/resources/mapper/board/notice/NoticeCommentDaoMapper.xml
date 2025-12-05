@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pplip.domain.board.notice.persistence.dao.NoticeCommentDao">
+
+    <select id="findAll" resultMap="summaryMap">
+        SELECT
+            nc.id           AS id,
+            p.nickname      AS authorName,
+            nc.content      AS content,
+            nc.created_at   AS createdAt,
+            nc.updated_at   AS updatedAt,
+
+            -- 프로필 이미지 정보 (LEFT JOIN)
+            pip.id              AS file_id,
+            pip.saved_file_name AS file_name,
+            pip.path            AS file_path,
+            pip.size            AS file_size
+
+        FROM notice_comment nc
+                 JOIN user u ON nc.author_id = u.id
+                 JOIN profile p ON u.id = p.user_id
+            -- [버그 수정] p.id = pip.profile_id 로 조인해야 정확합니다.
+                 LEFT JOIN profile_image_property pip ON p.id = pip.profile_id
+
+        WHERE nc.board_id = #{noticeId}
+          AND nc.is_removed = false -- nc.is_removed로 명시하는 게 좋습니다.
+        ORDER BY nc.created_at DESC
+    </select>
+
+    <resultMap id="summaryMap" type="com.pplip.domain.board.notice.api.response.NoticeCommentResponse$Summary">
+        <id property="id" column="id"/>
+        <result property="authorName" column="authorName"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="createdAt"/>
+        <result property="updatedAt" column="updatedAt"/>
+
+        <association property="profileImage" javaType="com.pplip.domain.file.api.response.FileResponse">
+            <id property="id" column="file_id"/>
+            <result property="name" column="file_name"/>
+            <result property="path" column="file_path"/>
+            <result property="size" column="file_size"/>
+        </association>
+    </resultMap>
+
+    <select id="noticeBoardCommentAllCount" resultType="int">
+        SELECT count(*)
+        FROM notice_comment
+        WHERE board_id = #{id}
+          AND is_removed = false
+    </select>
+
+    <insert id="insert" parameterType="com.pplip.domain.board.notice.persistence.entity.NoticeComment"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notice_comment (board_id, author_id, content, is_removed, created_at, updated_at)
+        VALUES (#{noticeBoardId}, #{authorId}, #{content}, #{isRemoved}, #{createdAt}, #{updatedAt});
+    </insert>
+
+    <update id="delete">
+        UPDATE notice_comment
+        SET is_removed = true,
+            updated_at = NOW()
+        WHERE id = #{id};
+    </update>
+
+    <update id="update" parameterType="com.pplip.domain.board.notice.persistence.entity.NoticeComment">
+        UPDATE notice_comment
+        <set>
+            <if test="content != null">
+                content = #{content},
+            </if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id};
+    </update>
+
+</mapper>

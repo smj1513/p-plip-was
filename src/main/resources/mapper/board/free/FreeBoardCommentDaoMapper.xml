@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pplip.domain.board.freeboard.persistence.dao.FreeBoardCommentDao">
+
+    <resultMap id="retrieveMap" type="com.pplip.domain.board.freeboard.api.response.FreeBoardCommentResponse$Retrieve">
+        <id property="id" column="comment_id"/>
+        <result property="content" column="content"/>
+        <result property="authorNickName" column="authorNickName"/>
+        <result property="createdAt" column="createdAt"/>
+        <result property="updatedAt" column="updatedAt"/>
+
+        <association property="profileImage" javaType="com.pplip.domain.file.api.response.FileResponse">
+            <id property="id" column="file_id"/>
+            <result property="name" column="file_name"/>
+            <result property="path" column="file_path"/>
+            <result property="size" column="file_size"/>
+        </association>
+    </resultMap>
+
+    <select id="findAll" resultMap="retrieveMap">
+        SELECT
+            fc.id           AS comment_id,
+            fc.content      AS content,
+            fc.created_at   AS createdAt,
+            fc.updated_at   AS updatedAt,
+            p.nickname      AS authorNickName,
+
+            pip.id              AS file_id,
+            pip.saved_file_name AS file_name,
+            pip.path            AS file_path,
+            pip.size            AS file_size
+
+        FROM free_comment fc
+                 JOIN user u ON fc.author_id = u.id
+                 JOIN profile p ON u.id = p.user_id
+                 LEFT JOIN profile_image_property pip ON p.id = pip.profile_id
+
+        WHERE fc.board_id = #{boardId}
+          AND fc.is_removed = false
+        ORDER BY fc.created_at DESC
+    </select>
+
+    <select id="findProfileImageByProfileId" resultType="com.pplip.domain.file.api.response.FileResponse">
+        select id,
+               saved_file_name as name,
+               path,
+               size
+        from profile_image_property where profile_id = #{profileId}
+    </select>
+
+    <insert id="insert" parameterType="com.pplip.domain.board.freeboard.persistence.entity.FreeComment" useGeneratedKeys="true" keyProperty="id">
+        insert into free_comment (board_id, author_id, content, is_removed, created_at, updated_at)
+        values (#{boardId}, #{authorId}, #{content}, #{isRemoved}, #{createdAt}, #{updatedAt});
+    </insert>
+
+    <update id="update" parameterType="com.pplip.domain.board.freeboard.persistence.entity.FreeComment">
+        update free_comment
+        <set>
+            <if test="content != null">
+                content = #{content},
+            </if>
+            updated_at = NOW()
+        </set>
+        where id = #{id};
+    </update>
+
+    <update id="delete">
+        update free_comment
+        set is_removed = true,
+            updated_at = NOW()
+        where id = #{id};
+    </update>
+
+</mapper>

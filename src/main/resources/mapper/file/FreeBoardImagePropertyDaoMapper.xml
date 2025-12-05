@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pplip.domain.file.persistence.dao.mapper.FreeBoardImagePropertyMapper">
+
+    <resultMap id="freeBoardImagePropertyMap" type="com.pplip.domain.file.persistence.entity.FreeBoardImageProperty" autoMapping="true"/>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into free_board_image_property (board_id, origin_file_name, path, saved_file_name, size, created_at, content_type
+                                              ,updated_at, uploader_id)
+        values (#{boardId}, #{originFileName}, #{path}, #{savedFileName}, #{size}, #{createdAt}, #{content_type}, #{updatedAt}, #{uploaderId});
+    </insert>
+
+
+    <insert id="insertAll" useGeneratedKeys="true" keyProperty="id">
+        insert into free_board_image_property (board_id, origin_file_name, path, saved_file_name, size, created_at,
+        content_type
+        ,updated_at, uploader_id)
+        values
+        <foreach collection="list" index="index" item="image" separator=",">
+            (#{boardId}, #{originFileName}, #{path}, #{savedFileName}, #{size}, #{createdAt}, #{content_type},
+            #{updatedAt}, #{uploaderId})
+        </foreach>
+    </insert>
+
+    <delete id="delete">
+        delete
+        from free_board_image_property
+        where id = #{id};
+    </delete>
+
+    <select id="findById" resultMap="freeBoardImagePropertyMap">
+        select *
+        from free_board_image_property
+        where id = #{id}
+    </select>
+
+    <select id="findAllByIds" resultMap="freeBoardImagePropertyMap">
+        select *
+        from free_board_image_property
+        where id in
+        <foreach collection="fileIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="bulkUpdateBoardId">
+        UPDATE free_board_image_property
+        SET
+        board_id = #{boardId},
+        updated_at = now()
+        WHERE id IN
+        <foreach collection="imageIds" item="imageId" open="(" close=")" separator=",">
+            #{imageId}
+        </foreach>
+    </update>
+</mapper>

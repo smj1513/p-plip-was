@@ -1,3 +1,4 @@
+
 #logging:
 #  level:
 #    com:
@@ -30,3 +31,38 @@
 #    map-underscore-to-camel-case: #TRUE OR FALSE
 #
 #key_kakao_javascript: #Your_Key_Here
+#springdoc:
+#  swagger-ui:
+#    # 접속 경로 설정 (기본값: /swagger-ui/index.html)
+#    path: /swagger-ui.html
+#
+#    # API 그룹 표시 순서 (알파벳순 등)
+#    groups-order: DESC
+#
+#    # HTTP Method 순서 정렬 (GET, POST, PUT, DELETE 순 등)
+#    operations-sorter: method
+#
+#    # 태그(Controller) 정렬 순서 (alpha: 알파벳순)
+#    tags-sorter: alpha
+#
+#    # 'Try it out' 버튼 클릭 시 Request Duration(소요 시간) 표시
+#    display-request-duration: true
+#
+#    # 하단의 Schemas(DTO 모델) 섹션 기본적으로 펼쳐두기 (false면 접힘)
+#    default-models-expand-depth: 1
+#
+#  api-docs:
+#    # OpenAPI JSON 문서 경로
+#    path: /v3/api-docs
+#
+#  # 브라우저 탭에 표시될 문서 제목/버전 등 (선택 사항)
+#  # Java Config(@Configuration)에서 설정하는 것이 더 일반적이나 yml로도 일부 제어 가능
+#  show-actuator: true
+
+#aws:
+#  s3:
+#    credentials:
+#      accessKey: ${AWS_S3_ACCESS_KEY}
+#      secretKey: ${AWS_S3_SECRET_KEY}
+#      region: ${AWS_S3_REGION}
+#    bucket: ${AWS_S3_BUCKET}
