@@ -2,6 +2,7 @@ package com.pplip.domain.auth.api.controller;
 
 import com.pplip.domain.auth.dto.LoginRequest;
 import com.pplip.domain.auth.jwt.Jwt;
+import com.pplip.domain.auth.jwt.JwtProperties;
 import com.pplip.domain.auth.usecase.AuthService;
 import com.pplip.global.api.code.SuccessCode;
 import com.pplip.global.api.response.CommonResponse;
@@ -28,6 +29,7 @@ public class AuthController implements AuthDocsController {
 		Cookie cookie = new Cookie("refreshToken", jwt.getRefreshToken());
 		cookie.setSecure(true);
 		cookie.setHttpOnly(true);
+		cookie.setMaxAge((int) JwtProperties.REFRESH_TOKEN_EXPIRE_TIME);
 		response.addCookie(cookie);
 		return CommonResponse.success(SuccessCode.CREATED, Map.of("accessToken", jwt.getAccessToken()));
 	}

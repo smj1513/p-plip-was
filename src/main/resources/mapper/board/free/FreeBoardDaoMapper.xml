@@ -19,12 +19,20 @@
         <result property="authorName" column="authorName"/>
         <result property="likeCnt" column="likeCnt"/>
 
+        <association property="authorImage" javaType="com.pplip.domain.file.api.response.FileResponse">
+            <id property="id" column="author_img_id"/>
+            <result property="name" column="author_img_name"/>
+            <result property="path" column="author_img_path"/>
+            <result property="size" column="author_img_size"/>
+            <result property="contentType" column="author_img_contentType"/>
+        </association>
+
         <collection property="freeBoardImages" ofType="com.pplip.domain.file.api.response.FileResponse">
-            <id property="id" column="img_id"/>
-            <result property="name" column="img_name"/>
-            <result property="path" column="img_path"/>
-            <result property="size" column="img_size"/>
-            <result property="contentType" column="img_contentType"/>
+            <id property="id" column="board_img_id"/>
+            <result property="name" column="board_img_name"/>
+            <result property="path" column="board_img_path"/>
+            <result property="size" column="board_img_size"/>
+            <result property="contentType" column="board_img_contentType"/>
         </collection>
     </resultMap>
 
@@ -120,16 +128,22 @@
                fb.updated_at AS updatedAt,
                fb.view_cnt AS viewCnt,
                (SELECT COUNT(*) FROM user_like_board ulb WHERE ulb.board_id = fb.id) AS likeCnt,
-               fbip.id AS img_id,
-               fbip.saved_file_name AS img_name,
-               fbip.path AS img_path,
-               fbip.size AS img_size,
-               fbip.content_type AS img_contentType
 
+               pip.id AS author_img_id,
+               pip.saved_file_name AS author_img_name,
+               pip.path AS author_img_path,
+               pip.size AS author_img_size,
+               pip.content_type AS author_img_contentType,
+
+               fbip.id AS board_img_id,
+               fbip.saved_file_name AS board_img_name,
+               fbip.path AS board_img_path,
+               fbip.size AS board_img_size,
+               fbip.content_type AS board_img_contentType
 
         FROM free_board fb
                  JOIN user u ON fb.author_id = u.id
-                 JOIN profile p ON u.id = p.user_id
+                 JOIN profile p ON p.user_id = u.id  LEFT JOIN profile_image_property pip ON pip.profile_id = p.id
                  LEFT JOIN free_board_image_property fbip ON fb.id = fbip.board_id
         WHERE fb.id = #{id} AND fb.is_removed = false
     </select>

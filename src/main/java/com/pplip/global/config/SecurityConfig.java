@@ -78,7 +78,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/freeboard/**").permitAll()
 						.requestMatchers(HttpMethod.GET, "/notice").permitAll()
 						.requestMatchers(HttpMethod.GET, "/notice/**").permitAll()
-						.requestMatchers("/notice/**").hasAnyAuthority(Role.ADMIN.getAuthority())
+						.requestMatchers("/notice/**").hasAuthority("ADMIN")
 						.requestMatchers("/error-code").permitAll()
 						.requestMatchers(HttpMethod.GET, "/trip/attraction/**").permitAll()
 						.requestMatchers(HttpMethod.GET, "/trip/plan/{planId}/todo").permitAll()

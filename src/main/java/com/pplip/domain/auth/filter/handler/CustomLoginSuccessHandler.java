@@ -2,6 +2,7 @@ package com.pplip.domain.auth.filter.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pplip.domain.auth.jwt.Jwt;
+import com.pplip.domain.auth.jwt.JwtProperties;
 import com.pplip.domain.auth.jwt.JwtUtil;
 import com.pplip.domain.auth.persistence.entity.Account;
 import com.pplip.global.api.code.SuccessCode;
@@ -34,7 +35,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
 		Cookie cookie = new Cookie("refreshToken", generate.getRefreshToken());
 		cookie.setHttpOnly(true);
 		cookie.setSecure(true);
-
+		cookie.setMaxAge((int) JwtProperties.REFRESH_TOKEN_EXPIRE_TIME);
 		response.addCookie(cookie);
 		response.setContentType("application/json;charset=UTF-8");
 		response.setCharacterEncoding("UTF-8");

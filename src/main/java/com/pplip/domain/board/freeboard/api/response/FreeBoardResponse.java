@@ -52,6 +52,7 @@ public class FreeBoardResponse {
         private String title;
         private String content;
         private String authorName;
+        private FileResponse authorImage;
         @JsonIgnore
         private long userId;
         private boolean isAuthor;
