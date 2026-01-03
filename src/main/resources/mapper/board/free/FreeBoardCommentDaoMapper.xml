@@ -2,49 +2,79 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pplip.domain.board.freeboard.persistence.dao.FreeBoardCommentDao">
 
+    <resultMap id="entityMap" type="com.pplip.domain.board.freeboard.persistence.entity.FreeComment" autoMapping="true">
+        <id column="id" property="id"/>
+    </resultMap>
+
     <resultMap id="retrieveMap" type="com.pplip.domain.board.freeboard.api.response.FreeBoardCommentResponse$Retrieve">
-        <id property="id" column="comment_id"/>
+        <id property="id" column="id"/>
         <result property="content" column="content"/>
         <result property="authorNickName" column="authorNickName"/>
         <result property="createdAt" column="createdAt"/>
         <result property="updatedAt" column="updatedAt"/>
+        <result property="userId" column="userId" />
 
         <association property="profileImage" javaType="com.pplip.domain.file.api.response.FileResponse">
             <id property="id" column="file_id"/>
             <result property="name" column="file_name"/>
             <result property="path" column="file_path"/>
             <result property="size" column="file_size"/>
+            <result property="contentType" column="file_contentType"/>
         </association>
     </resultMap>
 
-    <select id="findAll" resultMap="retrieveMap">
+    <resultMap id="createMap" type="com.pplip.domain.board.freeboard.api.response.FreeBoardCommentResponse$Detail" autoMapping="true">
+        <id property="id" column="id"/>
+        <association property="profileImage" javaType="com.pplip.domain.file.api.response.FileResponse">
+            <id property="id" column="file_id"/>
+            <result property="name" column="file_name"/>
+            <result property="path" column="file_path"/>
+            <result property="size" column="file_size"/>
+            <result property="contentType" column="file_contentType"/>
+        </association>
+    </resultMap>
+
+    <select id="findAllByBoardId" resultMap="retrieveMap">
         SELECT
-            fc.id           AS comment_id,
+            fc.id           AS id,
             fc.content      AS content,
             fc.created_at   AS createdAt,
             fc.updated_at   AS updatedAt,
             p.nickname      AS authorNickName,
+            fc.author_id    AS userId,
 
             pip.id              AS file_id,
             pip.saved_file_name AS file_name,
             pip.path            AS file_path,
-            pip.size            AS file_size
+            pip.size            AS file_size,
+            pip.content_type    AS file_contentType
 
         FROM free_comment fc
                  JOIN user u ON fc.author_id = u.id
-                 JOIN profile p ON u.id = p.user_id
+                 LEFT JOIN profile p ON u.id = p.user_id
                  LEFT JOIN profile_image_property pip ON p.id = pip.profile_id
 
         WHERE fc.board_id = #{boardId}
           AND fc.is_removed = false
+
         ORDER BY fc.created_at DESC
+        limit #{page.pageSize}
+        offset #{page.offset}
+    </select>
+
+    <select id="countAllByBoardId">
+        select count(*)
+        from free_comment
+        where board_id = #{boardId}
+          and is_removed = false;
     </select>
 
     <select id="findProfileImageByProfileId" resultType="com.pplip.domain.file.api.response.FileResponse">
         select id,
                saved_file_name as name,
                path,
-               size
+               size,
+               content_type as contentType
         from profile_image_property where profile_id = #{profileId}
     </select>
 
@@ -59,16 +89,43 @@
             <if test="content != null">
                 content = #{content},
             </if>
-            updated_at = NOW()
+            updated_at = #{updatedAt}
         </set>
         where id = #{id};
     </update>
 
     <update id="delete">
         update free_comment
-        set is_removed = true,
-            updated_at = NOW()
+        set is_removed = true
         where id = #{id};
     </update>
+
+    <select id="findByIdToDto" resultMap="createMap">
+        SELECT fc.id               AS id,
+               fc.content          AS content,
+               fc.created_at       AS createdAt,
+               fc.updated_at       AS updatedAt,
+               u.id                AS userId,
+               p.nickname          AS authorNickName,
+               pip.id              AS file_id,
+               pip.saved_file_name AS file_name,
+               pip.path            AS file_path,
+               pip.size            AS file_size,
+               pip.content_type    AS file_contentType
+
+        FROM free_comment fc
+                 JOIN user u ON fc.author_id = u.id
+                 JOIN profile p ON u.id = p.user_id
+                 LEFT JOIN profile_image_property pip ON p.id = pip.profile_id
+
+        WHERE fc.id = #{id}
+          AND fc.is_removed = false
+    </select>
+
+    <select id="findById" resultMap="entityMap">
+        select *
+        from free_comment
+        where is_removed = false and id = #{id}
+    </select>
 
 </mapper>

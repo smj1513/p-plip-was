@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 회원 관련 API 명세를 정의하는 인터페이스
  */
-@Tag(name = "User API", description = "사용자 API, 마이페이지, 회원가입 등")
+@Tag(name = "사용자 API", description = "사용자 API, 마이페이지, 회원가입 등")
 public interface UserDocsController {
 
     /**
@@ -24,7 +24,7 @@ public interface UserDocsController {
      */
     @Operation(summary = "이메일 중복 확인")
     @ApiResponse(responseCode = "200", description = "성공")
-    CommonResponse<UserResponse.DupCheck> emailDupCheck(@RequestParam String nickname);
+    CommonResponse<UserResponse.DupCheck> nicknameDupCheck(@RequestParam String nickname);
 
     /**
      * 회원가입을 처리합니다.

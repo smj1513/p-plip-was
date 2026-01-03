@@ -4,12 +4,11 @@ import com.pplip.domain.trip.plan.api.request.PlanRequest;
 import com.pplip.domain.trip.plan.api.response.PlanResponse;
 import com.pplip.global.api.response.CommonResponse;
 import com.pplip.global.page.Page;
+import com.pplip.global.page.PageRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.List;
 
 /**
  * 여행 계획 관련 API 명세서
@@ -24,7 +23,7 @@ public interface PlanDocsController {
      */
     @Operation(summary = "여행 계획 리스트 조회")
     @ApiResponse(responseCode = "200", description = "성공")
-    CommonResponse<Page<PlanResponse.Summary>> listPlan(UserDetails userDetails);
+    CommonResponse<Page<PlanResponse.Summary>> getPlanList(PageRequest pageRequest, UserDetails userDetails);
 
     /**
      * 특정 여행 계획의 상세 정보를 조회합니다.
@@ -33,7 +32,7 @@ public interface PlanDocsController {
      */
     @Operation(summary = "여행 계획 단건 조회")
     @ApiResponse(responseCode = "200", description = "성공")
-    CommonResponse<PlanResponse.Detail> getPlan(Long id);
+    CommonResponse<PlanResponse.PlanDetail> getPlanDetail(Long id);
 
     /**
      * 새로운 여행 계획을 생성합니다.
@@ -43,7 +42,7 @@ public interface PlanDocsController {
      */
     @Operation(summary = "여행 계획 생성")
     @ApiResponse(responseCode = "201", description = "생성")
-    CommonResponse<PlanResponse.Detail> postPlan(PlanRequest.Post request, UserDetails userDetails);
+    CommonResponse<PlanResponse.PlanDetail> postPlan(PlanRequest.Post request, UserDetails userDetails);
 
     /**
      * 기존 여행 계획을 수정합니다.

@@ -1,8 +1,6 @@
 package com.pplip.domain.file.persistence.dao.mapper;
 
-import com.pplip.domain.file.persistence.entity.FreeBoardImageProperty;
 import com.pplip.domain.file.persistence.entity.NoticeBoardImageProperty;
-import com.pplip.domain.file.persistence.entity.ReviewImageProperty;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -35,7 +33,7 @@ public interface NoticeBoardImagePropertyMapper{
      * @param list 삽입할 이미지 속성 객체 리스트
      * @return 삽입된 행의 수
      */
-    int insertAll(List<NoticeBoardImageProperty> list);
+    int insertAll(List<? extends NoticeBoardImageProperty> list);
 
     /**
      * 지정된 ID를 가진 공지사항 이미지 속성을 찾습니다.
@@ -61,4 +59,6 @@ public interface NoticeBoardImagePropertyMapper{
      * @return 공지사항 이미지 속성 목록
      */
     List<NoticeBoardImageProperty> findAllByIds(List<Long> fileIds);
+
+	void deleteAllById(List<Long> ids);
 }

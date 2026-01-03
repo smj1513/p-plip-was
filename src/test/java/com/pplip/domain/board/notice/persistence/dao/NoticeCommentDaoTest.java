@@ -10,6 +10,7 @@ import com.pplip.domain.user.persistence.dao.ProfileDao;
 import com.pplip.domain.user.persistence.dao.UserDao;
 import com.pplip.domain.user.persistence.entity.Profile;
 import com.pplip.domain.user.persistence.entity.User;
+import com.pplip.global.page.PageRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -86,7 +87,7 @@ class NoticeCommentDaoTest {
         noticeCommentDao.insert(NoticeComment.builder().noticeBoardId(noticeBoard.getId()).authorId(user.getId()).content("c1").build());
 
         // When
-        List<NoticeCommentResponse.Summary> comments = noticeCommentDao.findAll(noticeBoard.getId());
+        List<NoticeCommentResponse.Summary> comments = noticeCommentDao.findAll(noticeBoard.getId(), new PageRequest(0, 20));
 
         // Then
         assertNotNull(comments, "댓글 목록은 null이 아니어야 합니다.");
@@ -111,7 +112,7 @@ class NoticeCommentDaoTest {
 
         // Then
         assertThat(newComment.getId()).isNotNull();
-        Optional<NoticeCommentResponse.Summary> foundComment = noticeCommentDao.findAll(noticeBoard.getId()).stream()
+        Optional<NoticeCommentResponse.Summary> foundComment = noticeCommentDao.findAll(noticeBoard.getId(), new PageRequest(0, 20)).stream()
                 .filter(c -> c.getId().equals(newComment.getId()))
                 .findFirst();
         assertThat(foundComment).isPresent();
@@ -157,7 +158,7 @@ class NoticeCommentDaoTest {
 
         // Then
         assertThat(affectedRows).isEqualTo(1);
-        Optional<NoticeCommentResponse.Summary> foundComment = noticeCommentDao.findAll(noticeBoard.getId()).stream()
+        Optional<NoticeCommentResponse.Summary> foundComment = noticeCommentDao.findAll(noticeBoard.getId(), new PageRequest(0, 20)).stream()
                 .filter(c -> c.getId().equals(comment.getId()))
                 .findFirst();
         assertThat(foundComment).isPresent();
@@ -181,7 +182,7 @@ class NoticeCommentDaoTest {
 
         // Then
         assertThat(affectedRows).isEqualTo(1);
-        Optional<NoticeCommentResponse.Summary> foundComment = noticeCommentDao.findAll(noticeBoard.getId()).stream()
+        Optional<NoticeCommentResponse.Summary> foundComment = noticeCommentDao.findAll(noticeBoard.getId(), new PageRequest(0, 20)).stream()
                 .filter(c -> c.getId().equals(commentIdToDelete))
                 .findFirst();
         // Assuming soft delete means it's marked as removed, but DTO might exclude it

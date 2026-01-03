@@ -1,8 +1,8 @@
 package com.pplip.domain.file.persistence.dao.mapper;
 
 import com.pplip.domain.file.persistence.entity.ProfileImageProperty;
-import com.pplip.domain.file.persistence.entity.ReviewImageProperty;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.Optional;
 
@@ -34,4 +34,6 @@ public interface ProfileImagePropertyMapper{
      * @return 삭제된 행의 수
      */
     int delete(Long id);
+
+	Optional<ProfileImageProperty> findByProfileId(@Param("profileId") Long profileId);
 }

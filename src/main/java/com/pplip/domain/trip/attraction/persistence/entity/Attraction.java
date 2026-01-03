@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class Attraction {
     private Long no;
     private Long areaCode;

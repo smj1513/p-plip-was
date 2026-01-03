@@ -5,7 +5,7 @@
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         insert into notice_board_image_property (board_id, origin_file_name, path, saved_file_name, size, content_type, created_at,
                                                  updated_at, uploader_id)
-        values (#{boardId}, #{originFileName}, #{path}, #{savedFileName}, #{size}, #{createdAt}, #{content_type},#{updatedAt}, #{uploaderId});
+        values (#{boardId}, #{originFileName}, #{path}, #{savedFileName}, #{size}, #{contentType}, #{createdAt}, #{updatedAt}, #{uploaderId});
     </insert>
 
     <insert id="insertAll" useGeneratedKeys="true" keyProperty="id">
@@ -15,7 +15,7 @@
         values
         <foreach collection="list" index="index" item="image" separator=",">
             (#{image.boardId}, #{image.originFileName}, #{image.path}, #{image.savedFileName}, #{image.size}, #{image.createdAt},
-            #{image.content_type},#{image.updatedAt}, #{image.uploaderId})
+            #{image.contentType},#{image.updatedAt}, #{image.uploaderId})
         </foreach>
     </insert>
 
@@ -50,4 +50,12 @@
             #{imageId}
         </foreach>
     </update>
+
+    <delete id="deleteAllById">
+        DELETE FROM notice_board_image_property
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>

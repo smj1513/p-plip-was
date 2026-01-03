@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class PageRequest {
-    private int pageNum;
-    private int pageSize;
+    private int pageNum = 1;
+    private int pageSize = 20;
 
     // MyBatis가 #{offset}을 만났을 때 이 메서드를 호출합니다.
     public int getOffset() {

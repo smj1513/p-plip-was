@@ -95,7 +95,7 @@ class FileControllerTest {
 
         // When
         ResultActions actions = mockMvc.perform(
-                delete("/file/images/{id}", fileId)
+                delete("/file/image/{id}", fileId)
                         .param("imageType", "PROFILE")
                         .with(csrf())
         );

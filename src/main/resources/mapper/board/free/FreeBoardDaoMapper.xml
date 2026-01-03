@@ -1,6 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pplip.domain.board.freeboard.persistence.dao.FreeBoardDao">
+    <resultMap id="boardModelMap" type="com.pplip.domain.board.freeboard.usecase.model.FreeBoardModel" autoMapping="true"/>
+    <resultMap id="boardEntityMap" type="com.pplip.domain.board.freeboard.persistence.entity.FreeBoard" autoMapping="true"/>
+    <resultMap id="boardListMap" type="com.pplip.domain.board.freeboard.api.response.FreeBoardResponse$BoardList" autoMapping="true">
+        <id column="id" property="id"></id>
+        <association property="freeBoardImage" javaType="com.pplip.domain.file.api.response.FileResponse">
+            <id property="id" column="img_id"/>
+            <result property="name" column="img_name"/>
+            <result property="path" column="img_path"/>
+            <result property="size" column="img_size"/>
+            <result property="contentType" column="img_contentType"/>
+        </association>
+    </resultMap>
+
+    <resultMap id="detailMap" type="com.pplip.domain.board.freeboard.api.response.FreeBoardResponse$Detail" autoMapping="true">
+        <id property="id" column="id"/>
+        <result property="authorName" column="authorName"/>
+        <result property="likeCnt" column="likeCnt"/>
+
+        <association property="authorImage" javaType="com.pplip.domain.file.api.response.FileResponse">
+            <id property="id" column="author_img_id"/>
+            <result property="name" column="author_img_name"/>
+            <result property="path" column="author_img_path"/>
+            <result property="size" column="author_img_size"/>
+            <result property="contentType" column="author_img_contentType"/>
+        </association>
+
+        <collection property="freeBoardImages" ofType="com.pplip.domain.file.api.response.FileResponse">
+            <id property="id" column="board_img_id"/>
+            <result property="name" column="board_img_name"/>
+            <result property="path" column="board_img_path"/>
+            <result property="size" column="board_img_size"/>
+            <result property="contentType" column="board_img_contentType"/>
+        </collection>
+    </resultMap>
 
     <select id="findAll" resultMap="boardListMap">
         SELECT fb.id AS id,
@@ -8,50 +42,117 @@
                p.nickname AS authorName,
                fb.created_at AS createdAt,
                fb.updated_at AS updatedAt,
-               (SELECT COUNT(*) FROM user_like_board ulb WHERE ulb.board_id = fb.id) AS likeCnt
-        FROM free_board fb
-                 JOIN user u ON fb.author_id = u.id
-                 JOIN profile p ON p.user_id = u.id
-        WHERE fb.is_removed = false
-        ORDER BY fb.created_at DESC  LIMIT #{pageSize} OFFSET #{offset}
-    </select>
-
-    <resultMap id="boardListMap" type="com.pplip.domain.board.freeboard.api.response.FreeBoardResponse$BoardList" autoMapping="true">
-        <id column="id" property="id"></id>
-    </resultMap>
-
-    <resultMap id="detailMap" type="com.pplip.domain.board.freeboard.api.response.FreeBoardResponse$Detail" autoMapping="true">
-        <id property="id" column="board_id"/>
-        <result property="authorName" column="authorName"/>
-        <result property="likeCnt" column="likeCnt"/>
-
-        <collection property="freeBoardImages" ofType="com.pplip.domain.file.api.response.FileResponse">
-            <id property="id" column="img_id"/>
-            <result property="name" column="img_name"/>
-            <result property="path" column="img_path"/>
-            <result property="size" column="img_size"/>
-        </collection>
-    </resultMap>
-
-    <select id="findById" resultMap="detailMap">
-        SELECT fb.id AS board_id,
-               fb.title AS title,
-               p.nickname AS authorName,
-               fb.content AS content,
-               fb.created_at AS createdAt,
-               fb.updated_at AS updatedAt,
+               fb.view_cnt AS viewCnt,
+               fb.author_id AS userId,
                (SELECT COUNT(*) FROM user_like_board ulb WHERE ulb.board_id = fb.id) AS likeCnt,
+               (SELECT COUNT(*) FROM free_comment fbc WHERE fbc.board_id = fb.id) AS commentCnt,
 
                fbip.id AS img_id,
                fbip.saved_file_name AS img_name,
                fbip.path AS img_path,
-               fbip.size AS img_size
+               fbip.size AS img_size,
+               fbip.content_type AS img_contentType
+        FROM free_board fb
+                 JOIN user u ON fb.author_id = u.id
+                 JOIN profile p ON p.user_id = u.id
+                 LEFT JOIN free_board_image_property fbip
+                           ON fbip.id = (
+                               SELECT sub_img.id
+                               FROM free_board_image_property sub_img
+                               WHERE sub_img.board_id = fb.id
+                               ORDER BY sub_img.id ASC
+            LIMIT 1
+            )
+        WHERE fb.is_removed = false
+        <if test="sort != null">
+            <if test="sort.name() == 'POPULAR'">
+                ORDER BY likeCnt DESC
+            </if>
+            <if test="sort.name() == 'FAST'">
+                ORDER BY fb.created_at DESC
+            </if>
+        </if>
+        LIMIT #{pageRequest.pageSize} OFFSET #{pageRequest.offset}
+    </select>
+
+    <select id="findAllByUserId" resultMap="boardListMap">
+        SELECT fb.id AS id,
+        fb.title AS title,
+        p.nickname AS authorName,
+        fb.created_at AS createdAt,
+        fb.updated_at AS updatedAt,
+        fb.view_cnt AS viewCnt,
+        fb.author_id AS userId,
+        (SELECT COUNT(*) FROM user_like_board ulb WHERE ulb.board_id = fb.id) AS likeCnt,
+        (SELECT COUNT(*) FROM free_comment fbc WHERE fbc.board_id = fb.id) AS commentCnt,
+
+        fbip.id AS img_id,
+        fbip.saved_file_name AS img_name,
+        fbip.path AS img_path,
+        fbip.size AS img_size,
+        fbip.content_type AS img_contentType
+        FROM free_board fb
+        JOIN user u ON fb.author_id = u.id
+        JOIN profile p ON p.user_id = u.id
+        LEFT JOIN free_board_image_property fbip
+        ON fbip.id = (
+        SELECT sub_img.id
+        FROM free_board_image_property sub_img
+        WHERE sub_img.board_id = fb.id
+        ORDER BY sub_img.id ASC
+        LIMIT 1
+        )
+        WHERE fb.is_removed = false and
+        fb.author_id = #{userId}
+        <if test="sort != null">
+            ORDER BY fb.created_at
+            <if test="sort.name() == 'LATEST'">
+                ASC
+            </if>
+            <if test="sort.name() == 'FAST'">
+                DESC
+            </if>
+        </if>
+        LIMIT #{pageRequest.pageSize} OFFSET #{pageRequest.offset}
+    </select>
+
+
+
+    <select id="findByIdToDto" resultMap="detailMap">
+        SELECT fb.id AS id,
+               fb.title AS title,
+               p.nickname AS authorName,
+               u.id as userId,
+               fb.content AS content,
+               fb.created_at AS createdAt,
+               fb.updated_at AS updatedAt,
+               fb.view_cnt AS viewCnt,
+               (SELECT COUNT(*) FROM user_like_board ulb WHERE ulb.board_id = fb.id) AS likeCnt,
+
+               pip.id AS author_img_id,
+               pip.saved_file_name AS author_img_name,
+               pip.path AS author_img_path,
+               pip.size AS author_img_size,
+               pip.content_type AS author_img_contentType,
+
+               fbip.id AS board_img_id,
+               fbip.saved_file_name AS board_img_name,
+               fbip.path AS board_img_path,
+               fbip.size AS board_img_size,
+               fbip.content_type AS board_img_contentType
 
         FROM free_board fb
                  JOIN user u ON fb.author_id = u.id
-                 JOIN profile p ON u.id = p.user_id
+                 JOIN profile p ON p.user_id = u.id  LEFT JOIN profile_image_property pip ON pip.profile_id = p.id
                  LEFT JOIN free_board_image_property fbip ON fb.id = fbip.board_id
         WHERE fb.id = #{id} AND fb.is_removed = false
+    </select>
+
+    <select id="findById" resultMap="boardEntityMap">
+        select *
+        from free_board
+        where id = #{id}
+          and is_removed = false;
     </select>
 
     <update id="update" parameterType="com.pplip.domain.board.freeboard.persistence.entity.FreeBoard">
@@ -60,7 +161,8 @@
             <if test="title != null"> title = #{title}, </if>
             <if test="content != null"> content = #{content}, </if>
             <if test="viewCnt != 0"> view_cnt = #{viewCnt}, </if>
-            updated_at = NOW() </set>
+            updated_at = #{updatedAt}
+        </set>
         WHERE id = #{id};
     </update>
 
@@ -80,4 +182,23 @@
         insert into free_board (author_id, title, content, view_cnt, is_removed, created_at, updated_at)
         values (#{authorId}, #{title}, #{content}, #{viewCnt}, #{isRemoved}, #{createdAt}, #{updatedAt});
     </insert>
+
+    <select id="countAll">
+        select count(*)
+        from free_board
+        where is_removed = false;
+    </select>
+
+    <select id="countAllByUserId">
+        select count(*)
+        from free_board
+        where is_removed = false
+          and author_id = #{userId};
+    </select>
+
+    <update id="updateViewCount">
+        UPDATE free_board
+        SET view_cnt = view_cnt + 1
+        WHERE id = #{id}
+    </update>
 </mapper>

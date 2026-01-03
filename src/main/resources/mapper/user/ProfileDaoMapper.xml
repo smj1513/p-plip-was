@@ -2,6 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pplip.domain.user.persistence.dao.ProfileDao">
 
+
+    <resultMap id="dtoMap" type="com.pplip.domain.user.api.response.ProfileResponse$Info" autoMapping="true">
+        <result column="name" property="name"/>
+        <result column="nickname" property="nickname"/>
+        <result column="birth" property="birth"/>
+        <result column="desc" property="desc"/>
+
+        <association property="profileImage" javaType="com.pplip.domain.file.api.response.FileResponse">
+            <id column="file_id" property="id"/>
+            <result column="file_name" property="name"/>
+            <result column="content_type" property="contentType"/>
+            <result column="size" property="size"/>
+            <result column="path" property="path"/>
+        </association>
+    </resultMap>
+
     <insert id="insert" parameterType="com.pplip.domain.user.persistence.entity.Profile">
         insert into profile (description, user_id, nickname)
         values (#{description}, #{userId}, #{nickname});
@@ -50,5 +66,30 @@
     <delete id="delete">
         delete from profile where id = #{id};
     </delete>
+
+
+    <select id="findByIdToDto" resultMap="dtoMap">
+        select u.name as name,                     -- Info.name 매핑
+               u.birth as birth,
+               p.nickname,
+               a.email as email,
+               p.description AS "desc",    -- DB컬럼이 description이라면 alias 필수
+
+               -- FileResponse 매핑을 위한 별칭 지정
+               f.id          AS file_id,
+               f.saved_file_name        AS file_name, -- Info.name과 구분하기 위해 별칭 필수
+               f.content_type,
+               f.size,
+               f.path
+        from profile p
+                 left join user u
+                           on p.user_id = u.id
+                 left join account a
+                           on p.user_id = a.user_id
+                 left join profile_image_property f
+                           on p.id = f.profile_id
+        where p.user_id = #{userId}
+
+    </select>
 
 </mapper>

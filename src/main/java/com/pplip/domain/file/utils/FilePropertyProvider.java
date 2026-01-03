@@ -19,9 +19,8 @@ public class FilePropertyProvider {
     private final FilePathGenerator filePathGenerator;
 
     public FileProperty create(String fileName, String contentType, Long size, long uploaderId, ImageType imageType) {
-        String path = filePathGenerator.generatePath(fileName);
         String savedFileName = filePathGenerator.generateSaveFileName(fileName);
-
+        String path = filePathGenerator.generatePath(savedFileName);
         for (FilePropertyFactory factory : fileProperties) {
             if (factory.support(imageType)) {
                 return factory.create(fileName, savedFileName, path, contentType, size, uploaderId, imageType);

@@ -10,6 +10,7 @@ import com.pplip.domain.user.persistence.dao.ProfileDao;
 import com.pplip.domain.user.persistence.dao.UserDao;
 import com.pplip.domain.user.persistence.entity.Profile;
 import com.pplip.domain.user.persistence.entity.User;
+import com.pplip.global.page.PageRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -83,12 +84,12 @@ class FreeBoardCommentDaoTest {
 
     @Test
     @DisplayName("성공: 특정 게시글의 모든 댓글 조회")
-    void findAll_Success() {
+    void findAll_ByBoardId_Success() {
         // Given
         // Test data is assumed to be in the database or inserted here
 
         // When
-        List<FreeBoardCommentResponse.Retrieve> comments = freeBoardCommentDao.findAll(freeBoard.getId());
+        List<FreeBoardCommentResponse.Retrieve> comments = freeBoardCommentDao.findAllByBoardId(freeBoard.getId(), new PageRequest(0,10));
 
         // Then
         assertNotNull(comments, "댓글 목록은 null이 아니어야 합니다.");
@@ -112,7 +113,7 @@ class FreeBoardCommentDaoTest {
 
         // Then
         assertThat(newComment.getId()).isNotNull();
-        List<FreeBoardCommentResponse.Retrieve> comments = freeBoardCommentDao.findAll(freeBoard.getId());
+        List<FreeBoardCommentResponse.Retrieve> comments = freeBoardCommentDao.findAllByBoardId(freeBoard.getId(), new PageRequest(0, 10));
         Optional<FreeBoardCommentResponse.Retrieve> foundComment = comments.stream()
                 .filter(c -> c.getId().equals(newComment.getId()))
                 .findFirst();
@@ -160,7 +161,7 @@ class FreeBoardCommentDaoTest {
 
         // Then
         assertThat(affectedRows).isEqualTo(1);
-        List<FreeBoardCommentResponse.Retrieve> comments = freeBoardCommentDao.findAll(freeBoard.getId());
+        List<FreeBoardCommentResponse.Retrieve> comments = freeBoardCommentDao.findAllByBoardId(freeBoard.getId(), new PageRequest(0, 10));
         Optional<FreeBoardCommentResponse.Retrieve> foundComment = comments.stream()
                 .filter(c -> c.getId().equals(commentToUpdate.getId()))
                 .findFirst();
@@ -187,7 +188,7 @@ class FreeBoardCommentDaoTest {
         // Then
         assertThat(affectedRows).isEqualTo(1);
         // Assuming soft delete removes it from the list returned by findAll
-        List<FreeBoardCommentResponse.Retrieve> comments = freeBoardCommentDao.findAll(freeBoard.getId());
+        List<FreeBoardCommentResponse.Retrieve> comments = freeBoardCommentDao.findAllByBoardId(freeBoard.getId(), new PageRequest(0, 10));
         Optional<FreeBoardCommentResponse.Retrieve> foundComment = comments.stream()
                 .filter(c -> c.getId().equals(commentIdToDelete))
                 .findFirst();

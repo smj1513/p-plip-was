@@ -42,7 +42,7 @@ public interface FreeBoardImagePropertyMapper{
      * @param list 삽입할 이미지 속성 객체 리스트
      * @return 삽입된 행의 수
      */
-    int insertAll(List<FreeBoardImageProperty> list);
+    int insertAll(List<? extends FreeBoardImageProperty> list);
 
     /**
      * 여러 자유 게시판 이미지의 게시판 ID를 일괄 업데이트합니다.
@@ -60,4 +60,8 @@ public interface FreeBoardImagePropertyMapper{
      * @return 자유 게시판 이미지 속성 목록
      */
     List<FreeBoardImageProperty> findAllByIds(List<Long> fileIds);
+
+	List<FreeBoardImageProperty> findByBoardId(Long boardId);
+
+    void deleteAllByid(List<Long> ids);
 }

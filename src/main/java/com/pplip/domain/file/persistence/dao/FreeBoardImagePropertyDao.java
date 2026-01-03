@@ -44,7 +44,22 @@ public class FreeBoardImagePropertyDao implements BatchSupportFilePropertyDao<Fr
 	}
 
 	@Override
+	public void deleteAllById(List<Long> ids) {
+		mapper.deleteAllByid(ids);
+	}
+
+	@Override
 	public boolean supports(ImageType imageType) {
 		return ImageType.FREE_BOARD.equals(imageType);
 	}
+
+	@Override
+	public ImageType supports() {
+		return ImageType.FREE_BOARD;
+	}
+
+	public List<FreeBoardImageProperty> findByBoardId(Long boardId){
+		return mapper.findByBoardId(boardId);
+	}
+
 }

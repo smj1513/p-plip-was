@@ -94,4 +94,6 @@ class NoticeDaoTest {
         assertThat(all).isNotNull();
         assertThat(all.size()).isGreaterThanOrEqualTo(2);
     }
+
+
 }

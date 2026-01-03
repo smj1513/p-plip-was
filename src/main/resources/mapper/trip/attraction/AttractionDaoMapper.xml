@@ -2,13 +2,143 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pplip.domain.trip.attraction.persistence.dao.AttractionDao">
     <select id="findByNo" resultType="com.pplip.domain.trip.attraction.api.response.AttractionResponse$Details">
-        select *
+        select *,
+               (select count(*) from review r where r.attraction_id = #{no}) as reviewCnt
         from attractions
         where no = #{no};
+    </select>
+
+    <select id="findRandomFirstBySidoGuguns" resultType="com.pplip.domain.trip.attraction.api.response.AttractionResponse$Details">
+        select *
+        from attractions
+        <where>
+            area_code = #{sidoCode}
+        <if test="gugunCode != null">
+            AND si_gun_gu_code = #{gugunCode}
+        </if>
+        </where>
+        order by rand() limit 1;
+    </select>
+
+    <select id="findAllBySearch" resultMap="findAllMap">
+        select *,
+        ST_Distance_Sphere(
+                    POINT(longitude, latitude),             -- 저장된 컬럼 (순서 주의: 경도, 위도)
+                    POINT(#{search.lng}, #{search.lat})      -- 기준 위치 (순서 주의: 경도, 위도)
+                ) AS distance_in_meters
+        FROM attractions
+        <where>
+            ST_Distance_Sphere(
+            POINT(longitude, latitude),
+            POINT(#{search.lng}, #{search.lat})
+            )
+            <if test=" search.m != null ">
+                &lt;= #{search.m}
+            </if>
+
+            <if test="search.contentTypes != null">
+                AND content_type_id in
+                <foreach collection="search.contentTypes" item="contentType" open="(" close=")" separator=",">
+                    #{contentType.id}
+                </foreach>
+            </if>
+            <if test="search.query != null">
+                AND (
+                title LIKE CONCAT('%', #{search.query}, '%')
+                OR
+                overview LIKE CONCAT('%', #{search.query}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY distance_in_meters
+        LIMIT #{pageRequest.pageSize}
+        OFFSET #{pageRequest.offset};
+    </select>
+
+
+    <select id="countAllBySearch" resultType="int">
+        select count(*)
+        FROM attractions
+        <where>
+            ST_Distance_Sphere(
+            POINT(longitude, latitude),
+            POINT(#{lng}, #{lat})
+            )
+            <if test=" m != null" >
+                &lt;= #{m}
+            </if>
+
+            <if test="contentTypes != null">
+                AND content_type_id in
+                <foreach collection="contentTypes" item="contentType" open="(" close=")" separator=",">
+                    #{contentType.id}
+                </foreach>
+            </if>
+            <if test="query != null">
+                AND (
+                title LIKE CONCAT('%', #{query}, '%')
+                OR
+                overview LIKE CONCAT('%', #{query}, '%')
+                )
+            </if>
+        </where>;
+    </select>
+
+    <resultMap id="findAllMap" type="com.pplip.domain.trip.attraction.api.response.AttractionResponse$Summary" autoMapping="true">
+        <id property="no" column="no"></id>
+    </resultMap>
+
+    <select id="findAllByNos" resultMap="findAllMap">
+        select *
+        from attractions
+        where no in
+        <foreach collection="list" item="no" open="(" separator="," close=")">
+            #{no}
+        </foreach>
     </select>
 
     <insert id="insert" parameterType="com.pplip.domain.trip.attraction.persistence.entity.Attraction" useGeneratedKeys="true" keyProperty="no">
         INSERT INTO attractions (title, area_code, si_gun_gu_code, content_id, content_type_id, first_image1, first_image2, homepage, latitude, longitude, map_level, overview, tel)
         VALUES (#{title}, #{areaCode}, #{siGunGuCode}, #{contentId}, #{contentType.id}, #{firstImage1}, #{firstImage2}, #{homepage}, #{latitude}, #{longitude}, #{mapLevel}, #{overview}, #{tel})
     </insert>
+
+    <select id="findRandom" resultType="com.pplip.domain.trip.attraction.persistence.entity.Attraction">
+        select *
+        from attractions
+        where area_code = #{sidoCode}
+          <if test="gugunCode != null and gugunCode != 0">
+            and si_gun_gu_code = #{gugunCode}
+          </if>
+        order by rand()
+        limit 1;
+    </select>
+    <!--     List<AttractionResponse.AttrList> findMainAttractions(@Param("latitude") Double latitude, @Param("longitude") Double longitude);  -->
+
+<!--    public static class AttrList {-->
+<!--    private Long no;-->
+<!--    private String title;-->
+<!--    private String thumbnail;-->
+<!--    private int reviewCnt;-->
+<!--    private String overview;-->
+<!--    private float distance;-->
+<!--    }-->
+    <select id="findMainAttractions" resultType="com.pplip.domain.trip.attraction.api.response.AttractionResponse$NearByAttraction">
+        select no,
+               title,
+               first_image1                                                           as thumbnail,
+               (select count(*) from review r where r.attraction_id = attractions.no) as reviewCnt,
+               overview,
+               ST_Distance_Sphere(
+                       POINT(longitude, latitude),
+                       POINT(#{longitude}, #{latitude})
+               ) AS distance
+        from attractions
+        where ST_Distance_Sphere(
+                  POINT(longitude, latitude),
+                  POINT(#{longitude}, #{latitude})
+              ) &lt;= 3000
+        ORDER BY reviewCnt DESC, distance asc
+        LIMIT 10;
+
+    </select>
 </mapper>

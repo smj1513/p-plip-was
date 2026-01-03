@@ -19,8 +19,12 @@ public class JwtUtil {
         return provider.generate(authentication);
     }
 
-    public Account resolve(String authHeader) {
+    public Account resolveAccessToken(String authHeader) {
 
         return resolver.resolve(authHeader);
+    }
+
+    public Account resolveRefreshToken(String refreshToken){
+        return resolver.parse(refreshToken, JwtProperties.REFRESH_TOKEN_TYPE);
     }
 }

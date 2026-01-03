@@ -12,6 +12,6 @@ public enum DomainCode {
     AUTH(4),
     ATTRACTION(5),
     PLAN(6),
-    FILE(7);
+    FILE(7), BOARD_LIKE(8);
     private int value;
 }

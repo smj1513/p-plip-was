@@ -48,6 +48,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
             throw new InternalAuthenticationServiceException(e.getMessage());
         }
         AuthenticationManager am = getAuthenticationManager();
+        log.info("id:{}, pw:{}", loginRequest.getId(), loginRequest.getPassword());
         UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword());
         return am.authenticate(principal);
     }

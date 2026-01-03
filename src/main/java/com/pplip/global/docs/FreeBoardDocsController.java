@@ -2,6 +2,7 @@ package com.pplip.global.docs;
 
 import com.pplip.domain.board.freeboard.api.request.FreeBoardRequest;
 import com.pplip.domain.board.freeboard.api.response.FreeBoardResponse;
+import com.pplip.domain.board.freeboard.persistence.entity.FreeBoardSort;
 import com.pplip.global.api.response.CommonResponse;
 import com.pplip.global.page.Page;
 import com.pplip.global.page.PageRequest;
@@ -23,11 +24,24 @@ public interface FreeBoardDocsController {
      * 자유게시판 목록을 페이징하여 조회합니다.
      *
      * @param pageRequest 페이징 요청 정보
+     * @param sort 정렬 정보
      * @return 페이징된 자유게시판 목록
      */
     @Operation(summary = "자유게시판 페이징 조회")
     @ApiResponse(responseCode = "200", description = "성공")
-    public CommonResponse<Page<FreeBoardResponse.BoardList>> retrieveFreeBoard(@ModelAttribute PageRequest pageRequest);
+    public CommonResponse<Page<FreeBoardResponse.BoardList>> retrieveFreeBoard(@ModelAttribute PageRequest pageRequest, FreeBoardSort sort);
+
+    /**
+     * 로그된 사용자가 작성한 자유게시판 목록을 페이징하여 조회합니다.
+     *
+     * @param pageRequest 페이징 요청 정보
+     * @param sort 정렬 정보
+     * @param userDetails 인증된 유저 정보
+     * @return 페이징된 자유게시판 목록
+     */
+    @Operation(summary = "특정 사용자가 작성한 자유게시판 페이징 조회")
+    @ApiResponse(responseCode = "200", description = "성공")
+    public CommonResponse<Page<FreeBoardResponse.BoardList>> retrieveMyFreeBoard(PageRequest pageRequest, FreeBoardSort sort, UserDetails userDetails);
 
 
     /**
@@ -62,7 +76,7 @@ public interface FreeBoardDocsController {
      */
     @Operation(summary = "자유게시판 게시글 수정")
     @ApiResponse(responseCode = "202", description = "수정")
-    CommonResponse<FreeBoardResponse.Update> updateFreeBoardUpdate(FreeBoardRequest.BoardUpdate update, Long id, @AuthenticationPrincipal UserDetails principal);
+    CommonResponse<FreeBoardResponse.Detail> updateFreeBoardUpdate(FreeBoardRequest.BoardUpdate update, Long id, @AuthenticationPrincipal UserDetails principal);
 
 
     /**
@@ -76,4 +90,36 @@ public interface FreeBoardDocsController {
     @ApiResponse(responseCode = "203", description = "삭제")
     CommonResponse<FreeBoardResponse.Remove> removeFreeBoard(Long id, @AuthenticationPrincipal UserDetails principal);
 
+    /**
+     * 자유 게시판을 좋아요 했는지 확인.
+     *
+     * @param id 게시글 ID
+     * @param userDetails 게시글을 보고있는 인증된 유저.
+     * @return 유저의 게시글 좋아요 정보
+     */
+    @Operation(summary = "자유게시판 좋아요 조회")
+    @ApiResponse(responseCode = "200", description = "조회")
+    CommonResponse<FreeBoardResponse.BoardLike> getLikeFreeBoard(Long id, UserDetails userDetails);
+
+    /**
+     * 자유 게시판을 좋아요 생성.
+     *
+     * @param id 게시글 ID
+     * @param userDetails 게시글을 보고있는 인증된 유저.
+     * @return 유저의 게시글 좋아요 정보
+     */
+    @Operation(summary = "자유게시판 좋아요 생성")
+    @ApiResponse(responseCode = "201", description = "생성")
+    CommonResponse<FreeBoardResponse.BoardLike> likeFreeBoard(Long id, UserDetails userDetails);
+
+    /**
+     * 자유 게시판을 좋아요 생성.
+     *
+     * @param id 게시글 ID
+     * @param userDetails 게시글을 보고있는 인증된 유저.
+     * @return 유저의 게시글 좋아요 정보
+     */
+    @Operation(summary = "자유게시판 좋아요 삭제")
+    @ApiResponse(responseCode = "203", description = "삭제")
+    CommonResponse<FreeBoardResponse.BoardLike> unlikeFreeBoard(Long id, UserDetails userDetails);
 }

@@ -7,6 +7,7 @@
                nb.title as title,
                pf.nickname as authorName,
                nb.view_cnt as viewCnt,
+               nb.author_id as authorId,
                nb.created_at as createdAt,
                nb.updated_at as updatedAt
         FROM notice_board nb
@@ -17,39 +18,90 @@
             LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
+    <select id="findAllByUserId" resultMap="summaryMap">
+        SELECT nb.id as id,
+               nb.title as title,
+               pf.nickname as authorName,
+               nb.view_cnt as viewCnt,
+               nb.author_id as authorId,
+               nb.created_at as createdAt,
+               nb.updated_at as updatedAt
+        FROM notice_board nb
+                 JOIN user u ON nb.author_id = u.id
+                 JOIN profile pf ON pf.user_id = u.id
+        WHERE nb.is_removed = false and nb.author_id = #{userId}
+        ORDER BY nb.created_at DESC
+            LIMIT #{pageRequest.pageSize} OFFSET #{pageRequest.offset}
+    </select>
+
     <resultMap id="summaryMap" type="com.pplip.domain.board.notice.api.response.NoticeResponse$Summary" autoMapping="true"></resultMap>
 
     <select id="findById" resultMap="detailMap">
         SELECT nb.id as notice_id,
                nb.title as title,
                pf.nickname as authorName,
+               nb.author_id as authorId,
                nb.content as content,
                nb.view_cnt as viewCnt,
                nb.created_at as createdAt,
                nb.updated_at as updatedAt,
 
+            /* 게시글 이미지 (N) */
                nip.id as img_id,
                nip.saved_file_name as img_name,
                nip.path as img_path,
-               nip.size as img_size
+               nip.size as img_size,
+               nip.content_type as img_content_type,
+               /* 프로필 이미지 (1) */
+               pip.id as pip_img_id,
+               pip.saved_file_name as pip_img_name,
+               pip.path as pip_img_path,
+               pip.size as pip_img_size,
+               pip.content_type as pip_img_content_type
 
         FROM notice_board nb
                  JOIN user u ON nb.author_id = u.id
                  JOIN profile pf ON pf.user_id = u.id
+                 LEFT JOIN profile_image_property pip ON pf.id = pip.profile_id
                  LEFT JOIN notice_board_image_property nip ON nb.id = nip.board_id
 
         WHERE nb.id = #{id} AND nb.is_removed = false
     </select>
 
+    <select id="findByIdToEntity" resultType="com.pplip.domain.board.notice.persistence.entity.NoticeBoard">
+        SELECT *
+        FROM notice_board
+        where id = #{id} and is_removed=false;
+    </select>
+
+    <select id="noticeBoardAllCount" resultType="int">
+        select count(*)
+        from notice_board;
+    </select>
+
+    <select id="noticeBoardAllCountByUserId" resultType="int">
+        select count(*)
+        from notice_board
+        where author_id = #{userId};
+    </select>
+
     <resultMap id="detailMap" type="com.pplip.domain.board.notice.api.response.NoticeResponse$Detail" autoMapping="true">
+
         <id property="id" column="notice_id"/>
-        <result property="title" column="title"/>
-        <collection property="noticeImages" ofType="com.pplip.domain.file.api.response.FileResponse">
-            <id property="id" column="img_id"/>
-            <result property="name" column="img_name"/>
-            <result property="path" column="img_path"/>
-            <result property="size" column="img_size"/>
+        <association property="authorImage"
+                     javaType="com.pplip.domain.file.api.response.FileResponse"
+                     columnPrefix="pip_img_"
+                     autoMapping="true">
+            <id property="id" column="id"/>
+        </association>
+
+        <collection property="noticeImages"
+                    ofType="com.pplip.domain.file.api.response.FileResponse"
+                    columnPrefix="img_"
+                    autoMapping="true">
+            <id property="id" column="id"/>
         </collection>
+
     </resultMap>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
@@ -73,8 +125,14 @@
             <if test="content != null">
                 content = #{content},
             </if>
-            updated_at = NOW()
+            updated_at = #{updatedAt}
         </set>
         WHERE id = #{id};
+    </update>
+
+    <update id="updateViewCount">
+        UPDATE notice_board
+        SET view_cnt = view_cnt + 1
+        WHERE id = #{id}
     </update>
 </mapper>

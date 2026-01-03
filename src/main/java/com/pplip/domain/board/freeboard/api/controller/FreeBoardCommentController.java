@@ -1,12 +1,16 @@
 package com.pplip.domain.board.freeboard.api.controller;
 
+import com.pplip.domain.auth.persistence.entity.Account;
 import com.pplip.domain.board.freeboard.api.request.FreeBoardCommentRequest;
 import com.pplip.domain.board.freeboard.api.response.FreeBoardCommentResponse;
+import com.pplip.domain.board.freeboard.usecase.FreeBoardCommentService;
 import com.pplip.global.api.code.SuccessCode;
 import com.pplip.global.api.response.CommonResponse;
 import com.pplip.global.docs.FreeBoardCommentDocsController;
 import com.pplip.global.page.Page;
+import com.pplip.global.page.PageRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +19,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/freeboard")
 @RequiredArgsConstructor
+@Slf4j
 public class FreeBoardCommentController implements FreeBoardCommentDocsController {
+
+    private final FreeBoardCommentService commentService;
+
     /**
      * 특정 게시글의 댓글 목록을 조회합니다.
      *
@@ -24,8 +32,8 @@ public class FreeBoardCommentController implements FreeBoardCommentDocsControlle
      */
     @GetMapping("/{id}/comment")
     @Override
-    public CommonResponse<Page<FreeBoardCommentResponse.Retrieve>> getComments(@PathVariable(name = "id") Long boardId) {
-        return CommonResponse.success(SuccessCode.SUCCESS, null);
+    public CommonResponse<Page<FreeBoardCommentResponse.Retrieve>> getComments(@PathVariable(name = "id") Long boardId, @ModelAttribute PageRequest page) {
+        return CommonResponse.success(SuccessCode.SUCCESS, commentService.getComment(boardId, page));
     }
 
     /**
@@ -38,10 +46,11 @@ public class FreeBoardCommentController implements FreeBoardCommentDocsControlle
      */
     @PostMapping("/{id}/comment")
     @Override
-    public CommonResponse<FreeBoardCommentResponse.Create> postComment(@PathVariable(name = "id") Long boardId,
+    public CommonResponse<FreeBoardCommentResponse.Detail> postComment(@PathVariable(name = "id") Long boardId,
                                                                        @RequestBody FreeBoardCommentRequest.Create comment,
                                                                        @AuthenticationPrincipal UserDetails loginUser) {
-        return CommonResponse.success(SuccessCode.CREATED, null);
+        log.info("board id ={}, comment={}, loginUser={}", boardId, comment, ((Account) loginUser).getUserId());
+        return CommonResponse.success(SuccessCode.CREATED, commentService.postComment(boardId,comment,loginUser));
     }
 
     /**
@@ -55,7 +64,7 @@ public class FreeBoardCommentController implements FreeBoardCommentDocsControlle
     @Override
     public CommonResponse<Void> deleteComment(@PathVariable(name = "id") Long commentId,
                                               @AuthenticationPrincipal UserDetails loginUser) {
-        return CommonResponse.success(SuccessCode.SUCCESS, null);
+        return CommonResponse.success(SuccessCode.SUCCESS, commentService.deleteComment(commentId, loginUser));
     }
 
     /**
@@ -68,10 +77,10 @@ public class FreeBoardCommentController implements FreeBoardCommentDocsControlle
      */
     @PutMapping("/comment/{id}")
     @Override
-    public CommonResponse<FreeBoardCommentResponse.Update> updateComment(@PathVariable(name = "id") Long commentId,
+    public CommonResponse<FreeBoardCommentResponse.Detail> updateComment(@PathVariable(name = "id") Long commentId,
                                                                          @RequestBody FreeBoardCommentRequest.Update comment,
                                                                          @AuthenticationPrincipal UserDetails loginUser) {
-        return CommonResponse.success(SuccessCode.SUCCESS, null);
+        return CommonResponse.success(SuccessCode.SUCCESS, commentService.updateComment(commentId, comment, loginUser));
     }
 
 }

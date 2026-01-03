@@ -2,16 +2,16 @@ package com.pplip.domain.trip.plan.api.controller;
 
 import com.pplip.domain.trip.plan.api.request.PlanRequest;
 import com.pplip.domain.trip.plan.api.response.PlanResponse;
+import com.pplip.domain.trip.plan.usecase.PlanService;
 import com.pplip.global.api.code.SuccessCode;
 import com.pplip.global.api.response.CommonResponse;
 import com.pplip.global.docs.PlanDocsController;
 import com.pplip.global.page.Page;
+import com.pplip.global.page.PageRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * 여행 계획 관련 API를 처리하는 컨트롤러
@@ -20,6 +20,9 @@ import java.util.List;
 @RequestMapping("/trip/plan")
 @RequiredArgsConstructor
 public class PlanController implements PlanDocsController {
+
+    private final PlanService planService;
+
     /**
      * 사용자의 모든 여행 계획 리스트를 조회합니다.
      * @param userDetails 로그인한 사용자 정보
@@ -27,8 +30,8 @@ public class PlanController implements PlanDocsController {
      */
     @Override
     @GetMapping
-    public CommonResponse<Page<PlanResponse.Summary>> listPlan(@AuthenticationPrincipal UserDetails userDetails) {
-        return CommonResponse.success(SuccessCode.SUCCESS, null);
+    public CommonResponse<Page<PlanResponse.Summary>> getPlanList(@ModelAttribute PageRequest pageRequest, @AuthenticationPrincipal UserDetails userDetails) {
+        return CommonResponse.success(SuccessCode.SUCCESS, planService.getPlans(pageRequest, userDetails));
     }
 
     /**
@@ -38,8 +41,8 @@ public class PlanController implements PlanDocsController {
      */
     @Override
     @GetMapping("/{id}")
-    public CommonResponse<PlanResponse.Detail> getPlan(Long id) {
-        return CommonResponse.success(SuccessCode.SUCCESS, null);
+    public CommonResponse<PlanResponse.PlanDetail> getPlanDetail(@PathVariable("id") Long id) {
+        return CommonResponse.success(SuccessCode.SUCCESS, planService.getPlanDetail(id));
     }
 
     /**
@@ -50,8 +53,8 @@ public class PlanController implements PlanDocsController {
      */
     @Override
     @PostMapping
-    public CommonResponse<PlanResponse.Detail> postPlan(PlanRequest.Post request, @AuthenticationPrincipal UserDetails userDetails) {
-        return CommonResponse.success(SuccessCode.CREATED, null);
+    public CommonResponse<PlanResponse.PlanDetail> postPlan(@RequestBody PlanRequest.Post request, @AuthenticationPrincipal UserDetails userDetails) {
+        return CommonResponse.success(SuccessCode.CREATED, planService.createPlan(request, userDetails));
     }
 
     /**
@@ -62,8 +65,8 @@ public class PlanController implements PlanDocsController {
      */
     @Override
     @PutMapping("/{id}")
-    public CommonResponse<PlanResponse.Update> updatePlan(PlanRequest.Update update, @PathVariable Long id) {
-        return CommonResponse.success(SuccessCode.UPDATED, null);
+    public CommonResponse<PlanResponse.Update> updatePlan(@RequestBody PlanRequest.Update update, @PathVariable Long id) {
+        return CommonResponse.success(SuccessCode.UPDATED, planService.updatePlan(update, id));
     }
 
     /**
@@ -73,7 +76,17 @@ public class PlanController implements PlanDocsController {
      */
     @Override
     @DeleteMapping("/{id}")
-    public CommonResponse<?> deletePlan(Long id) {
-        return CommonResponse.success(SuccessCode.REMOVED, null);
+    public CommonResponse<?> deletePlan(@PathVariable Long id) {
+        return CommonResponse.success(SuccessCode.REMOVED, planService.removePlan(id));
+    }
+
+    @PostMapping("/suggest")
+    public CommonResponse<PlanResponse.PlanDetail> suggestPlan(@RequestBody PlanRequest.SuggestPlan suggest){
+        return CommonResponse.success(SuccessCode.CREATED, planService.suggestPlan(suggest));
+    }
+
+    @PostMapping("/suggest/random")
+    public CommonResponse<PlanResponse.PlanDetail> suggestRandomPlan(@RequestBody PlanRequest.RandomPlan suggest){
+        return CommonResponse.success(SuccessCode.CREATED, planService.randomPlan(suggest));
     }
 }

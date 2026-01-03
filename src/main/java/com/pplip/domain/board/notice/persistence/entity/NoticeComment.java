@@ -1,5 +1,6 @@
 package com.pplip.domain.board.notice.persistence.entity;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.*;
 
 import java.time.LocalDateTime;

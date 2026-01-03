@@ -36,4 +36,9 @@ public interface EmailValidator {
      * @param email
      */
     void deleteInfo(String email);
+
+    boolean validVerificationToken(String token, String email);
+    void putValidVerificationTokenInfo(String token, String email);
+
+    void deleteValidationTokenInfo(String token);
 }

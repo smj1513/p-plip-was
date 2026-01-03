@@ -61,7 +61,7 @@ class SidoGugunsDaoTest {
     @DisplayName("성공: 특정 시도의 구군 정보 조회")
     void findAllGugunInSido_Success() {
         // Given
-        Long sidoCode = 1L; // Assuming 1 is a valid sido_code (e.g., 서울)
+        Integer sidoCode = 1; // Assuming 1 is a valid sido_code (e.g., 서울)
 
         // When
         List<AttractionResponse.Gugun> guguns = sidoGugunsDao.findAllGugunInSido(sidoCode);
@@ -74,7 +74,7 @@ class SidoGugunsDaoTest {
     @DisplayName("실패: 존재하지 않는 시도 코드로 조회 시 빈 리스트 반환")
     void findAllGugunInSido_Fail_WhenSidoCodeNotFound() {
         // Given
-        Long nonExistentSidoCode = 9999L;
+        Integer nonExistentSidoCode = 9999;
 
         // When
         List<AttractionResponse.Gugun> guguns = sidoGugunsDao.findAllGugunInSido(nonExistentSidoCode);

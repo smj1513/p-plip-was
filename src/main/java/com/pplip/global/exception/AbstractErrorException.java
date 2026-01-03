@@ -12,7 +12,7 @@ public abstract class AbstractErrorException extends RuntimeException {
 
     public AbstractErrorException(ErrorCode errorCode) {
         this.errorCode = errorCode;
-        this.message = null;
+        this.message = errorCode.getDefaultMessage();
     }
 
     public AbstractErrorException(ErrorCode errorCode, String message) {

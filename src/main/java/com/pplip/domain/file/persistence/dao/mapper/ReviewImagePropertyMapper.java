@@ -34,7 +34,7 @@ public interface ReviewImagePropertyMapper{
      * @param list 삽입할 이미지 속성 객체 리스트
      * @return 삽입된 행의 수
      */
-    int insertAll(List<ReviewImageProperty> list);
+    int insertAll(List<? extends ReviewImageProperty> list);
 
     /**
      * 지정된 ID를 가진 리뷰 이미지 속성을 찾습니다.
@@ -60,4 +60,8 @@ public interface ReviewImagePropertyMapper{
      * @return 리뷰 이미지 속성 목록
      */
     List<ReviewImageProperty> findAllByIds(List<Long> fileIds);
+
+	void deleteAllById(List<Long> ids);
+
+    List<ReviewImageProperty> findAllByReviewId(Long reviewId);
 }

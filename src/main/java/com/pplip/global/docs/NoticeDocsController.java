@@ -10,6 +10,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.userdetails.UserDetails;
 
+/**
+ * 공지게시판 관련 API 명세를 정의하는 인터페이스
+ */
 @Tag(name = "공지게시판 API", description = "공지게시판 API")
 public interface NoticeDocsController {
 
@@ -22,6 +25,17 @@ public interface NoticeDocsController {
     @Operation(summary = "공지게시판 페이징 조회")
     @ApiResponse(responseCode = "200", description = "성공")
     CommonResponse<Page<NoticeResponse.Summary>> listNoticeBoard(PageRequest pageRequest);
+
+    /**
+     * 특정 사용자가 작성한 공지게시판의 게시글들을 불러옵니다.
+     *
+     * @param userDetails 인증된 사용자
+     * @param pageRequest 공지 게시글 페이징 정보.
+     * @return 페이징된 공지게시글 요약 정보.
+     */
+    @Operation(summary = "특정 사용자가 작성한 공지게시판 페이징 조회")
+    @ApiResponse(responseCode = "200", description = "성공")
+    CommonResponse<Page<NoticeResponse.Summary>> listMyNoticeBoard(UserDetails userDetails, PageRequest pageRequest);
 
 
     /**
@@ -54,7 +68,7 @@ public interface NoticeDocsController {
      */
     @Operation(summary = "공지게시판 게시판 수정")
     @ApiResponse(responseCode = "202", description = "수정")
-    CommonResponse<NoticeResponse.Update> updateNoticeBoard(NoticeRequest.Update update, Long id);
+    CommonResponse<NoticeResponse.Update> updateNoticeBoard(NoticeRequest.Update update, Long id, UserDetails userDetails);
 
     /**
      * 공지게시판의 게시글을 삭제합니다..
@@ -64,6 +78,6 @@ public interface NoticeDocsController {
      */
     @Operation(summary = "공지게시판 게시판 삭제")
     @ApiResponse(responseCode = "203", description = "삭제")
-    CommonResponse<NoticeResponse.Update> removeNoticeBoard(Long id);
+    CommonResponse<Void> removeNoticeBoard(Long id, UserDetails userDetails);
 
 }

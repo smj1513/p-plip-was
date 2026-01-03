@@ -5,11 +5,33 @@
         select *
         from search_history
         where user_id = #{userId}
-        desc searched_at desc;
+        order by searched_at desc
+            LIMIT #{pageRequest.pageSize}
+        OFFSET #{pageRequest.offset};
+
+    </select>
+
+    <select id="countAll" resultType="int">
+        select count(*)
+        from search_history
+        where user_id = #{userId};
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         insert into search_history (user_id, keyword, searched_at)
         values (#{userId}, #{keyword}, #{searchedAt});
     </insert>
+
+    <delete id="delete">
+        delete
+        from search_history
+        where id = #{id};
+    </delete>
+
+    <select id="findByIdAndUserId" resultType="com.pplip.domain.trip.attraction.persistence.entity.SearchHistory">
+        select *
+        from search_history
+        where user_id = #{userId}
+          and id = #{id};
+    </select>
 </mapper>

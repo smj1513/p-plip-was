@@ -26,7 +26,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String header = (String) authentication.getPrincipal();
 
-        Account account = jwtUtil.resolve(header);
+        Account account = jwtUtil.resolveAccessToken(header);
         return new UsernamePasswordAuthenticationToken(account, null, account.getAuthorities());
     }
 

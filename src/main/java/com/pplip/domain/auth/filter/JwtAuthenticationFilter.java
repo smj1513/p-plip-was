@@ -1,5 +1,6 @@
 package com.pplip.domain.auth.filter;
 
+import com.pplip.domain.auth.persistence.entity.Account;
 import com.pplip.domain.auth.provider.JwtAuthenticationProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,6 +15,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 import static com.pplip.domain.auth.jwt.JwtProperties.*;
 
@@ -22,10 +24,13 @@ import static com.pplip.domain.auth.jwt.JwtProperties.*;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtAuthenticationProvider provider;
+    private List<String> DONTNEEDAUTH = List.of("/auth");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
         String authHeader = request.getHeader(AUTH_HEADER);
+        String requestUrl = request.getRequestURI();
 
         /**
          * header에 authorization 이 없다면 다음 필터체인으로 넘김.
@@ -33,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
          * config 파일에 있는 제외 경로에 걸린다면 정상 작동,
          * 인증이 필요한 경로에 걸린다면 401 에러 발생.
          */
-        if (!StringUtils.hasText(authHeader)) {
+        if (!StringUtils.hasText(authHeader) || DONTNEEDAUTH.stream().filter(data -> requestUrl.startsWith(data)).findAny().isPresent()) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -49,6 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 인증된 Authentication 객체 context holder에 적재.
         SecurityContextHolder.getContext().setAuthentication(authenticated);
+        filterChain.doFilter(request, response);
     }
 
     private Authentication makeUnAuthToken(String data) {

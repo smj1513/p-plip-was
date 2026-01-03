@@ -1,5 +1,6 @@
 package com.pplip.domain.trip.attraction.api.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pplip.domain.trip.attraction.persistence.entity.ContentType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,6 +46,8 @@ public class AttractionResponse {
     public static class Summary {
         private Long no;
 
+        @JsonIgnore
+        private Long contentTypeId;
         private ContentType contentType;
 
         private String title;
@@ -53,11 +56,12 @@ public class AttractionResponse {
         private String firstImage2;
         private String homepage;
 
+        private String addr1;
+        private String addr2;
+
         private BigDecimal latitude;
         private BigDecimal longitude;
-
-        private int mapLevel;
-    }
+	}
 
 
     @Data
@@ -66,6 +70,10 @@ public class AttractionResponse {
     @AllArgsConstructor
     public static class Details{
         private Long no;
+
+        @JsonIgnore
+        private Long contentTypeId;
+
         private ContentType contentType;
 
         private String title;
@@ -76,8 +84,28 @@ public class AttractionResponse {
         private BigDecimal latitude;
         private BigDecimal longitude;
 
+        private String addr1;
+        private String addr2;
+
         private int mapLevel;
         private String overview;
         private String tel;
+
+        private List<String> tagNames;
+
+        private int reviewCnt;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+	public static class NearByAttraction {
+	    private Long no;
+        private String title;
+        private String thumbnail;
+        private int reviewCnt;
+        private String overview;
+        private float distance;
     }
 }

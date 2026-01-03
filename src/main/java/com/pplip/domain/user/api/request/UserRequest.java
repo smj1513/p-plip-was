@@ -17,9 +17,11 @@ public class UserRequest {
     public static class Join{
         private String email;
         private LocalDate birth;
+        private String name;
         private String nickname;
         private String password;
         private String description;
+        private String validationToken;
     }
 
     @Data

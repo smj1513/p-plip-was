@@ -1,5 +1,6 @@
 package com.pplip.domain.board.freeboard.api.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pplip.domain.file.api.response.FileResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,10 @@ public class FreeBoardCommentResponse {
         private Long id;
         private String content;
         private String authorNickName;
+
+        @JsonIgnore
+        private long userId;
+        private boolean isAuthor;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private FileResponse profileImage;
@@ -27,10 +32,14 @@ public class FreeBoardCommentResponse {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Create {
+    public static class Detail {
         private Long id;
         private String content;
         private String authorNickName;
+        @JsonIgnore
+        private long userId;
+
+        private boolean isAuthor;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private FileResponse profileImage;
@@ -44,6 +53,10 @@ public class FreeBoardCommentResponse {
         private Long id;
         private String content;
         private String authorNickName;
+        @JsonIgnore
+        private long userId;
+        private boolean isAuthor;
+
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private FileResponse profileImage;

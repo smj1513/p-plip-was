@@ -28,9 +28,17 @@ public class ProfileImagePropertyDao implements FilePropertyDao<ProfileImageProp
 		return profileImagePropertyMapper.findById(id);
 	}
 
-
 	@Override
 	public boolean supports(ImageType imageType) {
 		return ImageType.PROFILE.equals(imageType);
+	}
+
+	@Override
+	public ImageType supports() {
+		return ImageType.PROFILE;
+	}
+
+	public Optional<ProfileImageProperty> findByProfileId(Long profileId){
+		return profileImagePropertyMapper.findByProfileId(profileId);
 	}
 }

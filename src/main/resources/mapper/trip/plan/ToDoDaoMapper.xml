@@ -1,45 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pplip.domain.trip.plan.persistence.dao.TodoDao">
-    <select id="findAllByUserId" resultType="com.pplip.domain.trip.plan.api.response.ToDoResponse$Summary">
-        select t.id as id,
-               p.id as planId,
+    <select id="findAllByUserId" resultType="com.pplip.domain.trip.plan.api.response.ToDoResponse$ToDoSummary">
+        select t.id            as id,
+               p.id            as planId,
+               t.title         as title,
+               t.description   as description,
                t.attraction_id as attractionId,
-               a.first_image1 as attractionImage,
+               a.first_image1  as attractionImage,
                t.will_start_at as willStartAt,
-               t.will_end_at as willEndAt,
-               t.created_at as createdAt
+               t.will_end_at   as willEndAt,
+               t.created_at    as createdAt
         from to_do t
                  join plan p
                       on t.plan_id = p.id
-        join attractions a on a.no = t.attraction_id
+                 join attractions a on a.no = t.attraction_id
         where p.user_id = #{userId};
     </select>
+    <select id="findAllByPlanIdAndUserId" resultType="com.pplip.domain.trip.plan.api.response.ToDoResponse$ToDoSummary">
+        select t.id            as id,
+               p.id            as planId,
+               t.title         as title,
+               t.description as description,
 
-    <select id="findAllByPlanId" resultType="com.pplip.domain.trip.plan.api.response.ToDoResponse$Summary">
-        select t.id as id,
-               p.id as planId,
                t.attraction_id as attractionId,
-               a.first_image1 as attractionImage,
+               a.first_image1  as attractionImage,
+
+               a.latitude      as latitude,
+               a.longitude     as longitude,
+
                t.will_start_at as willStartAt,
-               t.will_end_at as willEndAt,
-               t.created_at as createdAt
+               t.will_end_at   as willEndAt,
+               t.created_at    as createdAt
+        from to_do t
+                 join plan p on t.plan_id = p.id
+                 join attractions a on a.no = t.attraction_id
+        where t.plan_id = #{planId}
+          and p.user_id = #{userId};
+    </select>
+
+    <select id="findAllByPlanId" resultType="com.pplip.domain.trip.plan.api.response.ToDoResponse$ToDoSummary">
+        select t.id            as id,
+               p.id            as planId,
+               t.title         as title,
+               t.description as description,
+               t.attraction_id as attractionId,
+               a.first_image1  as attractionImage,
+               a.latitude      as latitude,
+               a.longitude     as longitude,
+               t.will_start_at as willStartAt,
+               t.will_end_at   as willEndAt,
+               t.created_at    as createdAt
         from to_do t
                  join plan p on t.plan_id = p.id
                  join attractions a on a.no = t.attraction_id
         where t.plan_id = #{planId};
     </select>
 
-    <select id="findById" resultType="com.pplip.domain.trip.plan.api.response.ToDoResponse$Detail">
-        select t.id as id,
-               p.id as planId,
+    <select id="findById" resultType="com.pplip.domain.trip.plan.api.response.ToDoResponse$ToDoDetail">
+        select t.id            as id,
+               p.id            as planId,
+               t.title         as title,
                t.attraction_id as attractionId,
-               a.title as attractionTitle,
-               t.description as description,
-               a.first_image1 as attractionImage,
+               a.title         as attractionTitle,
+               a.latitude      as latitude,
+               a.longitude     as longitude,
+               t.description   as description,
+               a.first_image1  as attractionImage,
                t.will_start_at as willStartAt,
-               t.will_end_at as willEndAt,
-               t.created_at as createdAt
+               t.will_end_at   as willEndAt,
+               t.created_at    as createdAt
         from to_do t
                  join plan p on t.plan_id = p.id
                  join attractions a on a.no = t.attraction_id
@@ -53,22 +83,56 @@
 
     <update id="update" parameterType="com.pplip.domain.trip.plan.persistence.entity.ToDo">
         update to_do
-            <set>
-                 <if test="description != null">
-                     description = #{description},
-                 </if>
-                 <if test="willStartAt != null">
-                     will_start_at = #{willStartAt},
-                 </if>
-                 <if test="willEndAt != null">
-                     will_end_at = #{willEndAt},
-                 </if>
-            </set>
+        <set>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="willStartAt != null">
+                will_start_at = #{willStartAt},
+            </if>
+            <if test="willEndAt != null">
+                will_end_at = #{willEndAt},
+            </if>
+        </set>
         where id = #{id};
     </update>
+    <update id="updateAll">
+        <foreach collection="toDoList" item="todo" index="index" separator=";">
+            update to_do
+            <set>
+                title = #{todo.title},
+                description = #{todo.description},
+                will_start_at = #{todo.willStartAt},
+                will_end_at = #{todo.willEndAt},
+                updated_at = #{todo.updatedAt}
+            </set>
+            where id = #{todo.id}
+        </foreach>
+    </update>
+
     <delete id="delete">
         delete
         from to_do
         where id = #{id};
+    </delete>
+    <insert id="insertAll" useGeneratedKeys="true" keyProperty="id">
+        insert into to_do (plan_id, attraction_id, title, description, will_start_at, will_end_at, created_at)
+        values
+        <foreach collection="toDoList" item="todo" index="index" separator=",">
+            (#{todo.planId}, #{todo.attractionId}, #{todo.title} ,#{todo.description}, #{todo.willStartAt}, #{todo.willEndAt},
+            #{todo.createdAt})
+        </foreach>
+
+    </insert>
+
+    <delete id="deleteAll">
+        delete from to_do
+        where id in
+        <foreach collection="toDoIds" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
     </delete>
 </mapper>

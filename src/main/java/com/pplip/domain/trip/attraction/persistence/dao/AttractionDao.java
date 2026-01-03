@@ -1,12 +1,18 @@
 package com.pplip.domain.trip.attraction.persistence.dao;
 
+import com.pplip.domain.trip.attraction.api.request.AttractionRequest;
 import com.pplip.domain.trip.attraction.api.response.AttractionResponse;
+import com.pplip.domain.trip.attraction.persistence.entity.Attraction;
 import com.pplip.global.page.PageRequest;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * 여행지 데이터에 접근하는 DAO 인터페이스
+ */
 @Mapper
 public interface AttractionDao {
 
@@ -27,9 +33,19 @@ public interface AttractionDao {
      * ORDER BY distance_in_meters;
      */
 
-    List<AttractionResponse.Summary> findAll(PageRequest pageRequest);
+    List<AttractionResponse.Summary> findAllBySearch(AttractionRequest.Search search, PageRequest pageRequest);
 
     Optional<AttractionResponse.Details> findByNo(Long no);
 
-    int insert(com.pplip.domain.trip.attraction.persistence.entity.Attraction attraction);
+    List<AttractionResponse.Summary> findAllByNos(List<Long> nos);
+
+    int insert(Attraction attraction);
+
+    int countAllBySearch(AttractionRequest.Search search);
+
+    Optional<AttractionResponse.Details> findRandomFirstBySidoGuguns(AttractionRequest.SuggestBySidoGuguns search);
+
+    Attraction findRandom(@Param("sidoCode") int sidoCode, @Param("gugunCode") int gugunCode);
+
+    List<AttractionResponse.NearByAttraction> findMainAttractions(@Param("latitude") Double latitude, @Param("longitude") Double longitude);
 }

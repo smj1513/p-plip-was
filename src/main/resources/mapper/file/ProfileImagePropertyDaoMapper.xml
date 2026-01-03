@@ -6,8 +6,20 @@
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         insert into profile_image_property (profile_id, origin_file_name, path, saved_file_name, size, content_type, created_at,
                                               updated_at, uploader_id)
-        values (#{profileId}, #{originFileName}, #{path}, #{savedFileName}, #{size}, #{content_type} , #{createdAt}, #{updatedAt}, #{uploaderId});
+        values (#{profileId}, #{originFileName}, #{path}, #{savedFileName}, #{size}, #{contentType} , #{createdAt}, #{updatedAt}, #{uploaderId});
     </insert>
+
+    <select id="findById" resultMap="profileImagePropertyMap">
+        select *
+        from profile_image_property
+        where id = #{id}
+    </select>
+
+    <select id="findByProfileId" resultMap="profileImagePropertyMap">
+        select *
+        from profile_image_property
+        where profile_id = #{profileId}
+    </select>
 
     <delete id="delete">
         delete

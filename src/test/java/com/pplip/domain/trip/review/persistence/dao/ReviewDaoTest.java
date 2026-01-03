@@ -2,10 +2,12 @@ package com.pplip.domain.trip.review.persistence.dao;
 
 import com.pplip.domain.trip.review.api.response.ReviewResponse;
 import com.pplip.domain.trip.review.persistence.entity.Review;
+import com.pplip.domain.trip.review.persistence.entity.ReviewSort;
 import com.pplip.domain.user.persistence.dao.ProfileDao;
 import com.pplip.domain.user.persistence.dao.UserDao;
 import com.pplip.domain.user.persistence.entity.Profile;
 import com.pplip.domain.user.persistence.entity.User;
+import com.pplip.global.page.PageRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,7 +64,7 @@ class ReviewDaoTest {
         dao.insert(review);
 
         // when
-        List<ReviewResponse.Detail> reviews = dao.findAllByAttractionNo(attractionId);
+        List<ReviewResponse.Detail> reviews = dao.findAllByAttractionNo(attractionId, new PageRequest(1, 20), ReviewSort.ASC);
 
         // then
         assertThat(reviews).isNotNull().isNotEmpty();
@@ -77,7 +79,7 @@ class ReviewDaoTest {
         long attractionIdWithNoReviews = -1L;
 
         // when
-        List<ReviewResponse.Detail> reviews = dao.findAllByAttractionNo(attractionIdWithNoReviews);
+        List<ReviewResponse.Detail> reviews = dao.findAllByAttractionNo(attractionIdWithNoReviews, new PageRequest(1, 20), ReviewSort.ASC);
 
         // then
         assertThat(reviews).isNotNull().isEmpty();

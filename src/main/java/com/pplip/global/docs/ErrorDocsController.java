@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 public class ErrorDocsController {
 
-    @GetMapping("/error")
+    @GetMapping("/error-code")
     public List<ErrorResponse> getErrorList(){
         return Arrays.stream(ErrorCode.values()).map(errorCode ->
                 new ErrorResponse(errorCode.status(), errorCode.name(), errorCode.getDefaultMessage())

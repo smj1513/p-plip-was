@@ -1,6 +1,7 @@
 package com.pplip.domain.file.usecase;
 
 import com.pplip.domain.file.api.response.FileResponse;
+import com.pplip.domain.file.persistence.entity.FreeBoardImageProperty;
 import com.pplip.domain.file.persistence.entity.ImageType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +32,8 @@ public interface FileService {
 	 */
 	FileResponse remove(Long id, ImageType imageType, UserDetails principal);
 
+	void deleteOriginFiles(List<String> paths);
+	void deleteSavedFiles(List<Long> ids, ImageType imageType);
 	/**
 	 * 여러 파일을 저장합니다.
 	 *

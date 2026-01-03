@@ -1,5 +1,6 @@
 package com.pplip.domain.file.api.controller;
 
+import com.pplip.domain.auth.persistence.entity.Account;
 import com.pplip.domain.file.api.response.FileResponse;
 import com.pplip.domain.file.persistence.entity.ImageType;
 import com.pplip.domain.file.usecase.FileService;
@@ -7,6 +8,7 @@ import com.pplip.global.api.code.SuccessCode;
 import com.pplip.global.api.response.CommonResponse;
 import com.pplip.global.docs.FileDocsController;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/file")
 @RequiredArgsConstructor
+@Slf4j
 public class FileController implements FileDocsController {
 	private final FileService fileService;
 
@@ -41,6 +44,7 @@ public class FileController implements FileDocsController {
 			@AuthenticationPrincipal
 			UserDetails userDetails
 	) {
+		log.info("call request");
 		return CommonResponse.success(SuccessCode.CREATED, fileService.saveFile(multipartFile, imageType, userDetails));
 	}
 
@@ -62,7 +66,7 @@ public class FileController implements FileDocsController {
 	 * @param id 삭제할 이미지 id
 	 * @return 삭제된 파일 정보와 함께 성공 응답을 반환
 	 */
-	@DeleteMapping("/images/{id}")
+	@DeleteMapping("/image/{id}")
 	@Override
 	public CommonResponse<FileResponse> deleteFile(@PathVariable Long id,
 	                                               @AuthenticationPrincipal UserDetails principal,

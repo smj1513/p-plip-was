@@ -13,10 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class Account implements UserDetails {
     private Long id;
     private Long userId;
-
     private String email;
     private String password;
     private Role role;
@@ -32,5 +32,10 @@ public class Account implements UserDetails {
     @Override
     public String getUsername() {
         return getEmail();
+    }
+
+    @Override
+    public String getPassword(){
+        return password;
     }
 }

@@ -63,8 +63,8 @@ class TodoDaoTest {
                 .planId(planId)
                 .description("경복궁 가기")
                 .attractionId(56647L)
-                .willStartAt(LocalDate.now())
-                .willEndAt(LocalDate.now().plusDays(5))
+                .willStartAt(LocalDateTime.now())
+                .willEndAt(LocalDateTime.now().plusDays(5))
                 .createdAt(LocalDateTime.now())
                 .build();
         dao.insert(todo);
@@ -72,7 +72,7 @@ class TodoDaoTest {
         System.out.println("Gen key" + todo.getId());
 
         // when
-        Optional<ToDoResponse.Detail> foundTodoOptional = dao.findById(todo.getId());
+        Optional<ToDoResponse.ToDoDetail> foundTodoOptional = dao.findById(todo.getId());
 
         // then
         assertThat(foundTodoOptional).isPresent();
@@ -86,7 +86,7 @@ class TodoDaoTest {
         long nonExistentId = 999L;
 
         // when
-        Optional<ToDoResponse.Detail> detail = dao.findById(nonExistentId);
+        Optional<ToDoResponse.ToDoDetail> detail = dao.findById(nonExistentId);
 
         // then
         assertThat(detail).isNotPresent();
@@ -102,7 +102,7 @@ class TodoDaoTest {
         dao.insert(ToDo.builder().planId(planId).description("t2").createdAt(LocalDateTime.now()).attractionId(56647L).build());
 
         // when
-        List<ToDoResponse.Summary> allByPlanId = dao.findAllByPlanId(planId);
+        List<ToDoResponse.ToDoSummary> allByPlanId = dao.findAllByPlanId(planId);
 
         // then
         assertThat(allByPlanId).isNotNull();

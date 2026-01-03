@@ -20,6 +20,6 @@ public class UserResponse {
     @AllArgsConstructor
     public static class EmailCheck {
         private boolean isSuccess;
-        private String message;
+        private String verificationToken;
     }
 }

@@ -43,4 +43,6 @@ public interface FilePropertyDao <T extends FileProperty>{
 	 * @return 지원하면 true, 그렇지 않으면 false
 	 */
 	boolean supports(ImageType imageType);
+
+	ImageType supports();
 }

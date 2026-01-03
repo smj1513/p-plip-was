@@ -27,6 +27,7 @@ public class AwsS3FileStorage implements FileStorage {
 		objectMetadata.setContentType(file.getContentType());
 		try {
 			s3.putObject(bucketName, path, file.getInputStream(), objectMetadata);
+
 		} catch (IOException e) {
 			throw new BusinessLogicException(ErrorCode.FILE_PROCESS_FAILURE, "파일 저장에 실패했습니다.");
 		}

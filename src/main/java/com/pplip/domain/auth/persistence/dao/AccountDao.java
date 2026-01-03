@@ -23,4 +23,6 @@ public interface AccountDao {
     int insert(Account account);
 
     int updatePassword(Account account);
+
+    int count();
 }

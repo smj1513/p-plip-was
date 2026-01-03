@@ -31,6 +31,11 @@ public class ReviewImagePropertyDao implements BatchSupportFilePropertyDao<Revie
 	}
 
 	@Override
+	public void deleteAllById(List<Long> ids) {
+		mapper.deleteAllById(ids);
+	}
+
+	@Override
 	public int insert(ReviewImageProperty property) {
 		return mapper.insert(property);
 	}
@@ -48,5 +53,14 @@ public class ReviewImagePropertyDao implements BatchSupportFilePropertyDao<Revie
 	@Override
 	public boolean supports(ImageType imageType) {
 		return ImageType.REVIEW.equals(imageType);
+	}
+
+	@Override
+	public ImageType supports() {
+		return ImageType.REVIEW;
+	}
+
+	public List<ReviewImageProperty> findAllByReviewId(Long reviewId) {
+		return mapper.findAllByReviewId(reviewId);
 	}
 }

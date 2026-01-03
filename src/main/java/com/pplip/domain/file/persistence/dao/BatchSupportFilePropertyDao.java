@@ -34,4 +34,6 @@ public interface BatchSupportFilePropertyDao<T extends FileProperty> extends Fil
 	 * @return 파일 속성 목록
 	 */
 	List<T> findAllByIds(List<Long> fileIds);
+
+	void deleteAllById(List<Long> ids);
 }

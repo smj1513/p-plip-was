@@ -2,64 +2,173 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pplip.domain.trip.review.persistence.dao.ReviewDao">
 
-    <resultMap id="detailMap" type="com.pplip.domain.trip.review.api.response.ReviewResponse$Detail">
+    <resultMap id="detailMap" type="com.pplip.domain.trip.review.api.response.ReviewResponse$Detail" autoMapping="true">
         <id property="id" column="review_id"/>
-        <result property="username" column="username"/>
-        <result property="content" column="content"/>
-        <result property="createdAt" column="createdAt"/>
-        <result property="updatedAt" column="updatedAt"/>
-        <result property="authorId" column="authorId"/>
 
-        <association property="userProfileImage" javaType="com.pplip.domain.file.api.response.FileResponse">
-            <id property="id" column="profile_img_id"/>
-            <result property="name" column="profile_img_name"/>
-            <result property="size" column="profile_img_size"/>
-            <result property="path" column="profile_img_path"/>
+        <association property="userProfileImage"
+                     javaType="com.pplip.domain.file.api.response.FileResponse"
+                     columnPrefix="profile_img_"
+                     autoMapping="true">
+            <id property="id" column="id"/>
         </association>
 
-        <collection property="reviewImages" ofType="com.pplip.domain.file.api.response.FileResponse">
-            <id property="id" column="review_img_id"/>
-            <result property="name" column="review_img_name"/>
-            <result property="size" column="review_img_size"/>
-            <result property="path" column="review_img_path"/>
+        <collection property="reviewImages"
+                    ofType="com.pplip.domain.file.api.response.FileResponse"
+                    columnPrefix="review_img_"
+                    autoMapping="true">
+            <id property="id" column="id"/>
         </collection>
     </resultMap>
 
     <select id="findAllByAttractionNo" resultMap="detailMap">
-        SELECT
-        r.id            AS review_id,
-        p.nickname      AS username,
-        r.content       AS content,
-        r.created_at    AS createdAt,
-        r.updated_at    AS updatedAt,
-        r.author_id     AS authorId,
+        SELECT r.id                AS review_id,
+               p.nickname          AS username,
+               r.content           AS content,
+               r.created_at        AS createdAt,
+               r.updated_at        AS updatedAt,
+               r.author_id         AS authorId,
 
-        pip.id              AS profile_img_id,
-        pip.saved_file_name AS profile_img_name,
-        pip.size            AS profile_img_size,
-        pip.path            AS profile_img_path,
+               pip.id              AS profile_img_id,
+               pip.saved_file_name AS profile_img_name,
+               pip.size            AS profile_img_size,
+               pip.path            AS profile_img_path,
+               pip.content_type    AS profile_img_content_type,
 
-        rip.id              AS review_img_id,
-        rip.saved_file_name AS review_img_name,
-        rip.size            AS review_img_size,
-        rip.path            AS review_img_path
+               rip.id              AS review_img_id,
+               rip.saved_file_name AS review_img_name,
+               rip.size            AS review_img_size,
+               rip.path            AS review_img_path,
+               rip.content_type    AS review_img_content_type
 
         FROM review r
-        JOIN user u ON r.author_id = u.id
-        JOIN profile p ON u.id = p.user_id
+                 JOIN user u ON r.author_id = u.id
+                 JOIN profile p ON u.id = p.user_id
 
-        LEFT JOIN profile_image_property pip ON p.id = pip.profile_id
+                 LEFT JOIN profile_image_property pip ON p.id = pip.profile_id
 
-        LEFT JOIN review_image_property rip ON r.id = rip.review_id
+                 LEFT JOIN review_image_property rip ON r.id = rip.review_id
 
         WHERE r.attraction_id = #{attractionNo}
-        ORDER BY r.created_at DESC
+        ORDER BY r.created_at ${sort != null and sort.name() == 'DESC' ? 'DESC' : 'ASC'}
+
+            LIMIT #{pageRequest.pageSize}
+        OFFSET #{pageRequest.offset};
+
     </select>
+
+    <resultMap id="detailByUserMap" type="com.pplip.domain.trip.review.api.response.ReviewResponse$DetailWithAttractionName" autoMapping="true">
+        <id property="id" column="review_id"/>
+
+        <association property="userProfileImage"
+                     javaType="com.pplip.domain.file.api.response.FileResponse"
+                     columnPrefix="profile_img_"
+                     autoMapping="true">
+            <id property="id" column="id"/>
+        </association>
+
+        <collection property="reviewImages"
+                    ofType="com.pplip.domain.file.api.response.FileResponse"
+                    columnPrefix="review_img_"
+                    autoMapping="true">
+            <id property="id" column="id"/>
+        </collection>
+    </resultMap>
+    <select id="findAllByUserId" resultMap="detailByUserMap">
+        SELECT r.id                AS review_id,
+               p.nickname          AS username,
+               r.content           AS content,
+               r.created_at        AS createdAt,
+               r.updated_at        AS updatedAt,
+               r.author_id         AS authorId,
+               r.attraction_id     AS attractionNo,
+               a.title             AS attractionName,
+
+
+               pip.id              AS profile_img_id,
+               pip.saved_file_name AS profile_img_name,
+               pip.size            AS profile_img_size,
+               pip.path            AS profile_img_path,
+               pip.content_type    AS profile_img_content_type,
+
+               rip.id              AS review_img_id,
+               rip.saved_file_name AS review_img_name,
+               rip.size            AS review_img_size,
+               rip.path            AS review_img_path,
+               rip.content_type    AS review_img_content_type
+
+        FROM review r
+                 JOIN user u ON r.author_id = u.id
+                 JOIN profile p ON u.id = p.user_id
+                 LEFT JOIN attractions a ON a.no = r.attraction_id
+
+                 LEFT JOIN profile_image_property pip ON p.id = pip.profile_id
+
+                 LEFT JOIN review_image_property rip ON r.id = rip.review_id
+
+        WHERE r.author_id = #{userId}
+        ORDER BY r.created_at ${sort != null and sort.name() == 'DESC' ? 'DESC' : 'ASC'}
+
+            LIMIT #{pageRequest.pageSize}
+        OFFSET #{pageRequest.offset};
+
+    </select>
+
+    <select id="findById" resultMap="detailMap">
+        SELECT r.id                AS review_id,
+               p.nickname          AS username,
+               r.content           AS content,
+               r.created_at        AS createdAt,
+               r.updated_at        AS updatedAt,
+               r.author_id         AS authorId,
+
+               pip.id              AS profile_img_id,
+               pip.saved_file_name AS profile_img_name,
+               pip.size            AS profile_img_size,
+               pip.path            AS profile_img_path,
+               pip.content_type    AS profile_img_content_type,
+
+               rip.id              AS review_img_id,
+               rip.saved_file_name AS review_img_name,
+               rip.size            AS review_img_size,
+               rip.path            AS review_img_path,
+               rip.content_type    AS review_img_content_type
+
+        FROM review r
+                 JOIN user u ON r.author_id = u.id
+                 JOIN profile p ON u.id = p.user_id
+
+                 LEFT JOIN profile_image_property pip ON p.id = pip.profile_id
+
+                 LEFT JOIN review_image_property rip ON r.id = rip.review_id
+        where r.id = #{id};
+    </select>
+
+    <select id="findByIdToEntity" resultMap="entityMap">
+        select *
+        from review
+        where id = #{id};
+    </select>
+
+    <resultMap id="entityMap" type="com.pplip.domain.trip.review.persistence.entity.Review" autoMapping="true">
+        <id property="id" column="id"/>
+    </resultMap>
 
     <insert id="insert" parameterType="com.pplip.domain.trip.review.persistence.entity.Review" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO review (author_id, attraction_id, content, created_at, updated_at)
         VALUES (#{authorId}, #{attractionId}, #{content}, #{createdAt}, #{updatedAt});
     </insert>
+
+    <select id="countAllByAttractionNo" resultType="int">
+        SELECT count(*)
+        from review
+        where attraction_id = #{attractionNo};
+    </select>
+
+    <select id="countAllByUserId" resultType="int">
+        SELECT count(*)
+        from review
+        where author_id = #{userId};
+    </select>
 
     <update id="update" parameterType="com.pplip.domain.trip.review.persistence.entity.Review">
         UPDATE review
@@ -67,7 +176,7 @@
             <if test="content != null">
                 content = #{content},
             </if>
-            updated_at = NOW()
+            updated_at = #{updatedAt}
         </set>
         WHERE id = #{id};
     </update>

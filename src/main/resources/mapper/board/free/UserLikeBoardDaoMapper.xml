@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pplip.domain.board.freeboard.persistence.dao.UserLikeBoardDao">
+    <select id="findByBoardIdUserId" resultType="boolean">
+        select if (count(*) = 1, 1, 0)
+        from user_like_board
+        where board_id = #{boardId} and user_id = #{userId}
+    </select>
+
+    <insert id="insert">
+        insert into user_like_board (board_id, user_id)
+        values (#{boardId}
+             , #{userId});
+    </insert>
+
+    <delete id="delete">
+        delete
+        from user_like_board
+        where board_id = #{boardId}
+          and user_id = #{userId};
+    </delete>
+</mapper>

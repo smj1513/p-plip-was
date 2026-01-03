@@ -55,6 +55,6 @@ public class Page<T> {
 
         // 5. 이전, 다음 버튼 활성화 여부
         this.prev = this.startPage > 1;
-        this.next = this.endPage < this.totalPage;
+        this.next = this.pageNo < this.totalPage;
     }
 }

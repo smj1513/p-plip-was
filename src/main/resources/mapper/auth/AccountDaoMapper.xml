@@ -18,4 +18,9 @@
             updated_at = now()
         where email = #{email};
     </update>
+
+    <select id="count">
+        select count(*)
+        from account
+    </select>
 </mapper>
